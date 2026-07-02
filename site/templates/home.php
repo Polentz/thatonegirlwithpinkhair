@@ -1,4 +1,5 @@
 <?= snippet('head') ?>
+<?= snippet('header') ?>
 
 <section class="background"></section>
 

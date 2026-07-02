@@ -3,12 +3,51 @@ const documentHeight = () => {
     doc.style.setProperty("--doc-height", `${window.innerHeight}px`);
 };
 
-const draggableElems = document.querySelectorAll(".draggable, .block");
-let draggies = []
-for (let i = 0; i < draggableElems.length; i++) {
-    let draggableElem = draggableElems[i];
-    let draggie = new Draggabilly(draggableElem, {});
-    draggies.push(draggie);
+
+// Makes `target` follow the pointer while `handle` is dragged.
+// Delta-based, so it works regardless of any transform on the target.
+const makeDraggable = (handle, target) => {
+    let dragZ = 1000;
+    handle.style.touchAction = "none"; // don't scroll/zoom the page while dragging on touch
+
+    let startX, startY, startLeft, startTop, activeId = null;
+
+    handle.addEventListener("pointerdown", (e) => {
+        if (activeId !== null) return; // already dragging with another pointer
+        activeId = e.pointerId;
+        handle.setPointerCapture(activeId); // keep receiving moves even if the pointer leaves
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        const cs = getComputedStyle(target);
+        startLeft = parseFloat(cs.left) || 0;
+        startTop = parseFloat(cs.top) || 0;
+
+        target.style.zIndex = ++dragZ; // bring the grabbed item to the front
+        e.preventDefault(); // stop native image drag / text selection
+    });
+
+    handle.addEventListener("pointermove", (e) => {
+        if (e.pointerId !== activeId) return;
+        target.style.left = `${startLeft + (e.clientX - startX)}px`;
+        target.style.top = `${startTop + (e.clientY - startY)}px`;
+    });
+
+    const endDrag = (e) => {
+        if (e.pointerId !== activeId) return;
+        handle.releasePointerCapture(activeId);
+        activeId = null;
+    };
+    handle.addEventListener("pointerup", endDrag);
+    handle.addEventListener("pointercancel", endDrag);
+};
+
+const dragElements = () => {
+    document.querySelectorAll(".draggable").forEach((handle) => {
+        const target = handle.closest(".drag-element") || handle;
+        makeDraggable(handle, target);
+    });
 };
 
 const positionDragElements = () => {
@@ -23,7 +62,6 @@ const positionDragElements = () => {
     const placed = []; // bounding boxes already positioned
 
     elements.forEach(element => {
-        // Clear any CSS-driven positioning so inline top/left take over cleanly
         element.style.right = "auto";
         element.style.bottom = "auto";
 
@@ -54,201 +92,13 @@ const positionDragElements = () => {
         element.style.left = `${left}px`;
         element.style.top = `${top}px`;
     });
-};
-
-const selectElements = () => {
-    const elements = document.querySelectorAll(".drag-element");
-    const buttons = document.querySelectorAll(".button-element");
-    const reset = document.querySelector(".reset");
-    // const headerButton = document.querySelector(".button-header");
-    // const headerBox = document.querySelector(".header-box");
-
-    buttons.forEach(button => {
-        button.addEventListener("click", (e) => {
-            const pathName = e.currentTarget.dataset.path;
-            elements.forEach(element => {
-                const elementPath = element.dataset.path;
-                if (pathName === elementPath && element.classList.contains("step-2")) {
-                    element.classList.add("show");
-                    button.classList.add("selected");
-                    setTimeout(() => {
-                        element.classList.add("opacity");
-                    }, 500);
-                    setTimeout(() => {
-                        reset.classList.add("show");
-                    }, 1000);
-                } else {
-                    element.classList.add("opacity");
-                    setTimeout(() => {
-                        element.classList.add("hide");
-                    }, 1000);
-                };
-                // if (pathName != elementPath && element.classList.contains("step-1")) {
-                //     element.classList.add("opacity");
-                //     setTimeout(() => {
-                //         element.classList.add("hide");
-                //     }, 1000);
-                // };
-            });
-        });
-    });
-
-    // headerButton.addEventListener("click", () => {
-    //     elements.forEach(element => {
-    //         element.style.display = "none";
-    //         headerBox.style.display = "block";
-    //         setTimeout(() => {
-    //             headerBox.classList.add("opacity");
-    //         }, 100);
-    //     });
-        
-    // });
-};
-
-const audioPlayer = () => {
-    const audioComponent = document.querySelectorAll(".audio-component");
-    const playBtns = document.querySelectorAll(".play-btn");
-    audioComponent.forEach(component => {
-        playBtns.forEach(btn => {
-            if (btn.parentNode.parentNode === component) {
-                const audioPlayerContainer = component.querySelector(".audio-player");
-                const seekSlider = component.querySelector(".seek-slider");
-                const audio = component.querySelector("audio");
-                const stopBtn = component.querySelector(".stop-btn");
-                const playIcon = component.querySelector(".play-icon");
-                const pauseIcon = component.querySelector(".pause-icon");
-                const stopIcon = component.querySelector(".stop-icon");
-                const volumeIcon = component.querySelector(".volume-icon");
-                const muteIcon = component.querySelector(".mute-icon");
-                const durationContainer = component.querySelector(".audio-duration");
-                const currentTimeContainer = component.querySelector(".audio-progress");
-                const volumeContainer = component.querySelector(".audio-volume");
-                let raf = null;
-
-                btn.addEventListener("click", () => {
-                    if (audio.paused) {
-                        audio.play();
-                        requestAnimationFrame(whilePlaying);
-                    } else {
-                        audio.pause();
-                        cancelAnimationFrame(raf);
-                    };
-                    playIcon.classList.toggle("toggle-play");
-                    pauseIcon.classList.toggle("toggle-play");
-                    stopIcon.classList.add("toggle-play");
-                });
-
-                stopBtn.addEventListener("click", () => {
-                    stopAudio();
-                });
-
-                audio.addEventListener("timeupdate", () => {
-                    if (audio.duration === audio.currentTime) {
-                        stopAudio();
-                    };
-                });
-
-                volumeContainer.addEventListener("click", () => {
-                    controlVolume();
-                })
-
-                const controlVolume = () => {
-                    if (audio.volume > 0) {
-                        audio.volume = 0;
-                        volumeIcon.classList.add("toggle-volume");
-                        muteIcon.classList.add("toggle-volume");
-                    } else {
-                        audio.volume = 1;
-                        volumeIcon.classList.remove("toggle-volume");
-                        muteIcon.classList.remove("toggle-volume");
-                    }
-                }
-
-                const stopAudio = () => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    playIcon.classList.remove("toggle-play");
-                    pauseIcon.classList.remove("toggle-play");
-                    stopIcon.classList.remove("toggle-play");
-                };
-
-                const showRangeProgress = (rangeInput) => {
-                    audioPlayerContainer.style.setProperty("--seek-before-width", rangeInput.value / rangeInput.max * 100 + "%");
-                };
-
-                seekSlider.addEventListener("input", (e) => {
-                    showRangeProgress(e.target);
-                });
-
-                const calculateTime = (sec) => {
-                    let minutes = Math.floor(sec / 60);
-                    let seconds = Math.floor(sec - minutes * 60);
-                    if (seconds < 10) {
-                        seconds = `0${seconds}`;
-                    }
-                    return `${minutes}:${seconds}`;
-                };
-
-                const displayDuration = () => {
-                    durationContainer.textContent = calculateTime(audio.duration);
-                };
-
-                const setSliderMax = () => {
-                    seekSlider.max = Math.floor(audio.duration);
-                };
-
-                const whilePlaying = () => {
-                    seekSlider.value = Math.floor(audio.currentTime);
-                    currentTimeContainer.textContent = calculateTime(seekSlider.value);
-                    audioPlayerContainer.style.setProperty("--seek-before-width", `${seekSlider.value / seekSlider.max * 100}%`);
-                    raf = requestAnimationFrame(whilePlaying);
-                };
-
-                if (audio.readyState > 0) {
-                    displayDuration();
-                    setSliderMax();
-                }
-
-                audio.addEventListener("playing", () => {
-                    displayDuration();
-                    setSliderMax();
-                });
-
-                seekSlider.addEventListener("input", () => {
-                    currentTimeContainer.textContent = calculateTime(seekSlider.value);
-                    if (!audio.paused) {
-                        cancelAnimationFrame(raf);
-                    };
-                });
-
-                seekSlider.addEventListener("change", () => {
-                    audio.currentTime = seekSlider.value;
-                    if (!audio.paused) {
-                        requestAnimationFrame(whilePlaying);
-                    }
-                });
-            };
-        });
-    });
-
-    const buttonsClose = document.querySelectorAll(".subpage .popup-ui");
-    const audios = document.querySelectorAll("audio");
-    buttonsClose.forEach(button => {
-        button.addEventListener("click", () => {
-            audios.forEach(audio => {
-                if (audio.play) {
-                    audio.pause();
-                };
-            });
-        });
-    });
+    gsap.to(elements, { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
 };
 
 window.addEventListener("load", () => {
     documentHeight();
     positionDragElements();
-    selectElements();
-    audioPlayer();
+    dragElements();
 });
 
 window.addEventListener("resize", () => {

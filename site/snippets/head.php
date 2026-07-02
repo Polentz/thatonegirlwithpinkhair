@@ -29,6 +29,14 @@
         'assets/css/style.css',
         '@auto',
     ]) ?>
+    <noscript>Please turn on JS to navigate this website</noscript>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>
+    <?= js([
+        'assets/js/p5.js',
+        'assets/js/script.js',
+        'assets/js/animation.js',
+        '@auto',
+    ]) ?>
 </head>
 
 <body>
