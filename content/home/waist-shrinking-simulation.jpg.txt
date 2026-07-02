@@ -1,0 +1,5 @@
+Uuid: swessnlediuoknzx
+
+----
+
+Template: image

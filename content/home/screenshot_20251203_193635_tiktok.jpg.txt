@@ -1,0 +1,5 @@
+Uuid: 30h8qrxc5kdolmth
+
+----
+
+Template: image

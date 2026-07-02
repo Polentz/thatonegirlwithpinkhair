@@ -1,0 +1,25 @@
+title: You're logged in as that one girl with pink hair
+
+columns:
+  main:
+    width: 2/3
+    sections:
+      images:
+        type: fields
+        fields:
+          gallery:
+            type: files
+            template: image
+            uploads: image
+            multiple: true
+            image:
+              icon: true
+              ratio: 4/3
+              back: white
+              cover: true
+  sidebar:
+    width: 1/3
+    sections:
+      content:
+        type: fields
+        fields:
