@@ -23,3 +23,7 @@ columns:
       content:
         type: fields
         fields:
+          blocks:
+            type: blocks
+            fieldsets:
+              - text

@@ -4,6 +4,11 @@
 <section class="background"></section>
 
 <section class="line-layout">
+    <div class="blocks-stored" hidden>
+        <?php foreach ($page->blocks()->toBlocks() as $block): ?>
+            <?= $block ?>
+        <?php endforeach ?>
+    </div>
     <div class="blocks">
     </div>
 </section>

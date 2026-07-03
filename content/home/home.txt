@@ -64,4 +64,8 @@ Gallery:
 
 ----
 
+Blocks: [{"content":{"text":"<p>Going offline is a luxury</p>"},"id":"666ad16c-7488-4287-90fd-bc0e9fa2bc7e","isHidden":false,"type":"text"},{"content":{"text":"<p>Trad wives</p>"},"id":"18873eee-0c04-4e0e-b55b-e00eafcccbef","isHidden":false,"type":"text"},{"content":{"text":"<p>I'm just a girl</p>"},"id":"fb2c5360-2299-4db0-adac-d324c64dbefd","isHidden":false,"type":"text"},{"content":{"text":"<p>Ai slop</p>"},"id":"df4020bf-9c9a-4ed0-9508-59ad2d27c512","isHidden":false,"type":"text"},{"content":{"text":"<p>Distrust in the feed</p>"},"id":"8202c41f-5079-49f4-9bf8-f66e095b3350","isHidden":false,"type":"text"},{"content":{"text":"<p>Reaction pics</p>"},"id":"a41af9b3-0b5e-4006-b666-064c710a91dc","isHidden":false,"type":"text"},{"content":{"text":"<p>Going analog</p>"},"id":"ccb20f5e-5c34-4ca8-b7ee-4c299f56f3cb","isHidden":false,"type":"text"},{"content":{"text":"<p>The algorithm is personalized</p>"},"id":"eea0a3b0-3474-4863-88f1-aad0a9ea2778","isHidden":false,"type":"text"},{"content":{"text":"<p>Cottagecore</p>"},"id":"fdb02584-66e0-4b48-8936-b078c9e9ac8e","isHidden":false,"type":"text"},{"content":{"text":"<p>A life online is a life performed</p>"},"id":"27c83de9-39b5-4ce3-8d3b-7d07e4f014af","isHidden":false,"type":"text"}]
+
+----
+
 Uuid: fxso6mm7ysa9vlyh

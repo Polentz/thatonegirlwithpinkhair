@@ -31,8 +31,10 @@
     ]) ?>
     <noscript>Please turn on JS to navigate this website</noscript>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/RandomGamingDev/VecJs/vec.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/RandomGamingDev/Zoomp5js/zoom.js"></script>
     <?= js([
-        'assets/js/p5.js',
         'assets/js/script.js',
         'assets/js/animation.js',
         '@auto',

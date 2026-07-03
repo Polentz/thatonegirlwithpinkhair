@@ -32,12 +32,14 @@ const makeDraggable = (handle, target) => {
         if (e.pointerId !== activeId) return;
         target.style.left = `${startLeft + (e.clientX - startX)}px`;
         target.style.top = `${startTop + (e.clientY - startY)}px`;
+        window.setGuidePointer?.(e.clientX, e.clientY); // keep the p5 guide line tracking
     });
 
     const endDrag = (e) => {
         if (e.pointerId !== activeId) return;
         handle.releasePointerCapture(activeId);
         activeId = null;
+        window.clearGuidePointer?.(); // hand control back to the real mouse
     };
     handle.addEventListener("pointerup", endDrag);
     handle.addEventListener("pointercancel", endDrag);
@@ -47,6 +49,42 @@ const dragElements = () => {
     document.querySelectorAll(".draggable").forEach((handle) => {
         const target = handle.closest(".drag-element") || handle;
         makeDraggable(handle, target);
+    });
+};
+
+// Playful "pop & wobble" when the pointer hovers a card: it jumps forward,
+// scales up and does a quick springy tilt before settling.
+const hoverInteraction = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let hoverZ = 500;
+
+    document.querySelectorAll(".drag-element").forEach((element) => {
+        const wrapper = element.querySelector(".drag-element-wrapper") || element;
+
+        // Smoothed setters so rapid enter/leave never fights itself.
+        const toScale = gsap.quickTo(wrapper, "scale", { duration: 0.35, ease: "power3.out" });
+
+        wrapper.addEventListener("pointerenter", () => {
+            element.style.zIndex = ++hoverZ; // sit above its neighbours
+            toScale(1.12);
+            gsap.to(wrapper, {
+                // boxShadow: "0 0 40px 12px rgb(216 26 125 / 55%)",
+                keyframes: { rotation: [0, -7, 5, -3, 0] },
+                duration: 0.6,
+                ease: "power2.out",
+            });
+        });
+
+        wrapper.addEventListener("pointerleave", () => {
+            toScale(1);
+            gsap.to(wrapper, {
+                rotation: 0,
+                // boxShadow: "0 0 24px 8px rgb(216 26 125 / 30%)",
+                duration: 0.4,
+                ease: "power2.out",
+            });
+        });
     });
 };
 
@@ -98,6 +136,7 @@ const positionDragElements = () => {
 window.addEventListener("load", () => {
     documentHeight();
     positionDragElements();
+    // hoverInteraction();
     dragElements();
 });
 

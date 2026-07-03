@@ -236,40 +236,12 @@ input[type="search"]::-webkit-search-results-decoration {
     display: none;
 }
 
-/* *::-moz-selection {
-    color: var(--color-black);
-    background: var(--color-highlight);
+*::-moz-selection {
+    color: transparent;
+    background: transparent;
 }
 
 *::selection {
-    color: var(--color-black);
-    background: var(--color-highlight);
+    color: transparent;
+    background: transparent;
 }
-
-a::-moz-selection {
-    color: var(--color-highlight);
-    background: var(--color-black);
-}
-
-a::selection {
-    color: var(--color-highlight);
-    background: var(--color-black);
-}
-
-.button span::-moz-selection,
-summary.button span::-moz-selection {
-    color: inherit;
-    background: inherit;
-}
-
-.button span::-moz-selection,
-summary.button span::-moz-selection {
-    color: inherit;
-    background: inherit;
-}
-
-.button span::selection,
-summary.button span::selection {
-    color: inherit;
-    background: inherit;
-} */
