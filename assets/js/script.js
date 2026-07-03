@@ -244,6 +244,54 @@ const dashboardControls = () => {
     // });
 };
 
+// Click the logo to toggle "stamp mode": the cursor becomes the logo image and
+// clicking a drag-element stamps the logo on top of it (once per element).
+const logoStamp = () => {
+    const logo = document.querySelector(".logo");
+    if (!logo) return;
+    const logoSrc = logo.querySelector("img")?.getAttribute("src");
+
+    let stampMode = false;
+
+    logo.addEventListener("click", (e) => {
+        e.stopPropagation();
+        stampMode = !stampMode;
+        document.body.classList.toggle("stamp-mode", stampMode);
+    });
+
+    const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click
+
+    document.querySelectorAll(".drag-element").forEach((element) => {
+        // Listen on the wrapper: .drag-element has pointer-events:none, the
+        // wrapper is the visible, clickable box, and stamping into it makes the
+        // stamp travel with the card when it's dragged.
+        const wrapper = element.querySelector(".drag-element-wrapper") || element;
+
+        // Remember where the press started so a click that followed a drag can
+        // be told apart from a clean click-in-place.
+        let downX = 0, downY = 0;
+        wrapper.addEventListener("pointerdown", (e) => {
+            downX = e.clientX;
+            downY = e.clientY;
+        });
+
+        wrapper.addEventListener("click", (e) => {
+            if (!stampMode) return;
+            if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged, not stamped
+            if (wrapper.querySelector(".logo-stamp")) return; // one stamp per card
+
+            const rect = wrapper.getBoundingClientRect();
+            const stamp = document.createElement("img");
+            stamp.src = logoSrc;
+            stamp.className = "logo-stamp";
+            stamp.style.left = `${((e.clientX - rect.left) / rect.width) * 100}%`;
+            stamp.style.top = `${((e.clientY - rect.top) / rect.height) * 100}%`;
+
+            wrapper.appendChild(stamp);
+        });
+    });
+};
+
 const positionDragElements = () => {
     const container = document.querySelector(".drag-layout");
     if (!container) return;
@@ -295,6 +343,7 @@ window.addEventListener("load", () => {
     // hoverInteraction();
     dragElements();
     dashboardControls();
+    logoStamp();
 });
 
 window.addEventListener("resize", () => {

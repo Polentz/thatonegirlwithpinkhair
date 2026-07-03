@@ -17,14 +17,23 @@ em {
     font-style: italic;
 }
 
-.header {
+.logo {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.logo img {
+    width: 4rem;
+}
+
+.nav {
     position: fixed;
     top: 0;
     right: 0;
     z-index: 9999;
-}
-
-.nav {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -111,12 +120,29 @@ h1 {
 }
 
 .drag-element-wrapper {
+    position: relative;
+    /* anchor for the logo stamp */
     width: 3vw;
     display: flex;
     flex-direction: column;
     align-items: center;
     pointer-events: all;
     box-shadow: 0 0 24px 8px rgb(216 26 125 / 30%);
+}
+
+/* Stamp mode: swap the cursor for the logo (trailing numbers = click hotspot). */
+body.stamp-mode,
+body.stamp-mode .drag-element-wrapper {
+    cursor: url("../../content/pinkwig-cursor.png") 38 48, crosshair;
+}
+
+.logo-stamp {
+    position: absolute;
+    width: 60%;
+    transform: translate(-50%, -50%);
+    /* centre the stamp on the click point */
+    pointer-events: none;
+    z-index: 10;
 }
 
 .drag-element-wrapper img {
