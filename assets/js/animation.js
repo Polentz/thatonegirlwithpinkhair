@@ -73,7 +73,13 @@ function resetMap() {
 //     startY = newEndY;
 // };
 
-function mousePressed() {
+function mousePressed(event) {
+    // p5 fires this for presses anywhere on the page, so a click on a nav link
+    // would also drop a line item. Bail when the press lands on a nav-label so
+    // the link just navigates.
+    if (event && event.target.closest(".nav-label")) return;
+    if (event && event.target.closest(".drag-element")) return;
+
     let newEndX = mouseX;
     let newEndY = mouseY;
     let p = new Path(startX, startY, newEndX, newEndY);
