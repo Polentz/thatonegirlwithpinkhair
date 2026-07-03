@@ -180,17 +180,24 @@ const dashboardControls = () => {
 
         panUpdater = anchoredPan; // pin the cursor point while the scale eases
         applyScale();
+        updateCursor(); // grab cursor appears once we're zoomed in
     }, { passive: false });
 
-    // --- Pan (drag empty space) -----------------------------------------
+    // --- Pan (drag empty space, only while zoomed in) -------------------
     layout.style.touchAction = "none"; // don't let touch scroll the page while panning
-    layout.style.cursor = "grab"; // hint that empty space is draggable
 
     let startX, startY, startPanX, startPanY, activeId = null;
+
+    // Show the grab cursor only when there's room to pan (zoomed in), and never
+    // override 'grabbing' mid-drag.
+    const updateCursor = () => {
+        if (activeId === null) layout.style.cursor = scale > 1 ? "grab" : "";
+    };
 
     layout.addEventListener("pointerdown", (e) => {
         // Only pan from empty space — let cards run their own drag handlers.
         if (e.target.closest(".drag-element")) return;
+        if (scale <= 1) return; // nothing to pan until zoomed in
         if (activeId !== null) return; // already panning with another pointer
 
         activeId = e.pointerId;
@@ -216,7 +223,7 @@ const dashboardControls = () => {
         if (e.pointerId !== activeId) return;
         layout.releasePointerCapture(activeId);
         activeId = null;
-        layout.style.cursor = "grab";
+        updateCursor(); // back to grab if still zoomed in, else default
     };
     layout.addEventListener("pointerup", endPan);
     layout.addEventListener("pointercancel", endPan);
