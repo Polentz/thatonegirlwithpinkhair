@@ -2,6 +2,7 @@
 
 html {
     font-size: 100%;
+    cursor: crosshair;
 }
 
 body {
@@ -80,13 +81,11 @@ h1 {
 
 .block {
     position: absolute;
-    /* padding: 15px 15px; */
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     white-space: nowrap;
     text-align: center;
-    /* background-color: #fff; */
     -webkit-transition: all 0.1s;
     -o-transition: all 0.1s;
     transition: all 0.1s;
@@ -118,8 +117,6 @@ h1 {
     flex-direction: column;
     align-items: center;
     pointer-events: all;
-    /* border: 1px solid var(--main-color); */
-    background-color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 0 24px 8px rgb(216 26 125 / 30%);
 }
 
@@ -139,40 +136,18 @@ h1 {
 }
 
 @media screen and (max-width: 720px) {
-    .mobile {
-        width: 100%;
-        height: var(--doc-height);
-        position: fixed;
-        top: 0;
-        left: 0;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        gap: 1rem;
-        padding: 1rem;
-        text-align: center;
-        z-index: 999;
+
+    body {
+        font-size: 0.75rem;
     }
 
-    .mobile-wrapper {
-        padding: 15px 15px;
-        border: 1px solid #000;
-        background-color: #fff;
+    h1,
+    .header .nav {
+        font-size: 1rem;
     }
 
-    canvas,
-    .line-layout,
-    .drag-layout {
-        display: none;
+    .drag-element-wrapper {
+        width: 8vw;
+        box-shadow: 0 0 8px 4px rgb(216 26 125 / 30%);
     }
 }
