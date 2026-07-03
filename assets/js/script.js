@@ -107,7 +107,7 @@ const dashboardControls = () => {
     if (!layout) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const MIN_SCALE = 0.75;
+    const MIN_SCALE = 0.2;
     const MAX_SCALE = 5;
     const SENSITIVITY = 0.0015; // scale change per wheel-delta unit
 
@@ -263,6 +263,13 @@ const logoStamp = () => {
         preview.style.left = `${e.clientX}px`;
         preview.style.top = `${e.clientY}px`;
     };
+
+    // Hide the trailing logo over the nav so it doesn't cover the links.
+    const nav = document.querySelector(".nav");
+    if (nav) {
+        nav.addEventListener("pointerenter", () => preview.classList.add("over-nav"));
+        nav.addEventListener("pointerleave", () => preview.classList.remove("over-nav"));
+    }
 
     logo.addEventListener("click", (e) => {
         e.stopPropagation();
