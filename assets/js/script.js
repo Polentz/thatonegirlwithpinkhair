@@ -244,8 +244,9 @@ const dashboardControls = () => {
     // });
 };
 
-// Click the logo to toggle "stamp mode": the cursor becomes the logo image and
-// clicking a drag-element stamps the logo on top of it (once per element).
+// Click the logo to toggle "stamp mode": the logo image trails the pointer (over
+// a normal crosshair cursor) and clicking a drag-element stamps the logo on top
+// of it (once per element).
 const logoStamp = () => {
     const logo = document.querySelector(".logo");
     if (!logo) return;
@@ -253,10 +254,25 @@ const logoStamp = () => {
 
     let stampMode = false;
 
+    const preview = document.createElement("img");
+    preview.src = logoSrc;
+    preview.className = "stamp-cursor";
+    document.body.appendChild(preview);
+
+    const movePreview = (e) => {
+        preview.style.left = `${e.clientX}px`;
+        preview.style.top = `${e.clientY}px`;
+    };
+
     logo.addEventListener("click", (e) => {
         e.stopPropagation();
         stampMode = !stampMode;
         document.body.classList.toggle("stamp-mode", stampMode);
+        if (stampMode) {
+            window.addEventListener("pointermove", movePreview);
+        } else {
+            window.removeEventListener("pointermove", movePreview);
+        }
     });
 
     const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click

@@ -27,6 +27,11 @@ em {
 
 .logo img {
     width: 4rem;
+    transition: filter .2s ease-in-out;
+}
+
+body.stamp-mode .logo img {
+    filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.5)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.7)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.8))
 }
 
 .nav {
@@ -63,6 +68,7 @@ h1 {
         0 0 10px rgb(216, 26, 125, 0.5),
         0 0 20px rgb(216, 26, 125, 0.7),
         0 0 40px rgba(216, 26, 124, 0.8);
+    pointer-events: none;
 }
 
 .background {
@@ -121,7 +127,6 @@ h1 {
 
 .drag-element-wrapper {
     position: relative;
-    /* anchor for the logo stamp */
     width: 3vw;
     display: flex;
     flex-direction: column;
@@ -130,17 +135,25 @@ h1 {
     box-shadow: 0 0 24px 8px rgb(216 26 125 / 30%);
 }
 
-/* Stamp mode: swap the cursor for the logo (trailing numbers = click hotspot). */
-body.stamp-mode,
-body.stamp-mode .drag-element-wrapper {
-    cursor: url("../../content/pinkwig-cursor.png") 38 48, crosshair;
+.stamp-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 4rem;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10000;
+    display: none;
+}
+
+body.stamp-mode .stamp-cursor {
+    display: block;
 }
 
 .logo-stamp {
     position: absolute;
     width: 60%;
     transform: translate(-50%, -50%);
-    /* centre the stamp on the click point */
     pointer-events: none;
     z-index: 10;
 }

@@ -38,7 +38,7 @@ window.clearGuidePointer = () => {
 function draw() {
     background(255, 255, 255);
 
-    if (count < blocks.length) {
+    if (count < blocks.length && !document.body.classList.contains("stamp-mode")) {
         const aim = guidePointer || { x: mouseX, y: mouseY };
         let guide = new Path(startX, startY, aim.x, aim.y);
         guide.show();
@@ -74,6 +74,7 @@ function resetMap() {
 // };
 
 function mousePressed(event) {
+    if (document.body.classList.contains("stamp-mode")) return; // don't draw/place while stamping
     if (event && event.target.closest(".logo")) return;
     if (event && event.target.closest(".nav-label")) return;
     if (event && event.target.closest(".drag-element")) return;
