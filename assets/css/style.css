@@ -19,15 +19,34 @@ em {
 .header {
     width: 100%;
     position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+.header nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2rem;
+    padding: 1rem;
+    font-size: 2rem;
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+h1 {
+    width: 100%;
+    position: fixed;
     top: 50%;
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     z-index: 9999;
-}
-
-.header h1 {
     font-size: 4rem;
     text-align: center;
     text-shadow:
