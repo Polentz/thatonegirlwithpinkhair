@@ -107,21 +107,19 @@ const dashboardControls = () => {
     if (!layout) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const MIN_SCALE = 0.1;
+    const MIN_SCALE = 0.75;
     const MAX_SCALE = 5;
     const SENSITIVITY = 0.0015; // scale change per wheel-delta unit
 
-    let scale = 1;
-    let panX = 0, panY = 0;
+    let scale = 1;          // target zoom the wheel drives toward
+    let panX = 0, panY = 0; // current translate, in screen pixels
 
     window.getDragZoom = () => scale;
 
-    // Clamp the pan to the current (possibly still-animating) scale. The layout
-    // is viewport-sized and scales about its centre, so each axis has slack of
-    // size·(s-1)/2 in either direction; at <=1x there is none, so it locks to
-    // centre. Reading scaleX live keeps the collage in bounds *while* it eases.
-    const clampPan = () => {
-        const s = gsap.getProperty(layout, "scaleX") || 1;
+    // Bounds: the layout is viewport-sized and scales about its centre, so each
+    // axis has slack of size·(s-1)/2 in either direction; at <=1x there is none,
+    // so it locks to centre. Clamps panX/panY in place, then writes them out.
+    const clampAndRender = (s) => {
         const maxX = Math.max(0, (layout.offsetWidth * (s - 1)) / 2);
         const maxY = Math.max(0, (layout.offsetHeight * (s - 1)) / 2);
         panX = Math.min(maxX, Math.max(-maxX, panX));
@@ -129,19 +127,58 @@ const dashboardControls = () => {
         gsap.set(layout, { x: panX, y: panY });
     };
 
+    // Cursor-anchored zoom. At wheel time we capture the layout-local point
+    // under the pointer (anchorWorld); then on every frame we recompute the pan
+    // from the *live* scale so that point stays pinned under the cursor — no
+    // drift, even while the zoom eases. originX/Y is the layout's untransformed
+    // centre in client coords.
+    let anchorClientX = 0, anchorClientY = 0;
+    let anchorWorldX = 0, anchorWorldY = 0;
+    let originX = 0, originY = 0;
+
+    const anchoredPan = () => {
+        const s = gsap.getProperty(layout, "scaleX") || 1;
+        panX = anchorClientX - originX - s * anchorWorldX;
+        panY = anchorClientY - originY - s * anchorWorldY;
+        clampAndRender(s);
+    };
+
+    const renderPan = () => clampAndRender(gsap.getProperty(layout, "scaleX") || 1);
+
+    // The scale setters call panUpdater every frame; swapping it lets the same
+    // eased scale drive cursor-anchored zoom (anchoredPan) or free pan/reset
+    // (renderPan).
+    let panUpdater = renderPan;
+
     // Smoothed scale setters. Drive scaleX/scaleY (not the "scale" shorthand):
-    // quickTo uses resetTo, which can't reset a shorthand that splits into two
-    // properties. Re-clamp every frame so zooming out pulls the pan back in.
-    const toScaleX = gsap.quickTo(layout, "scaleX", { duration: 0.4, ease: "power3.out", onUpdate: clampPan });
+    // quickTo uses resetTo, which can't reset a shorthand that splits in two.
+    const toScaleX = gsap.quickTo(layout, "scaleX", { duration: 0.4, ease: "power3.out", onUpdate: () => panUpdater() });
     const toScaleY = gsap.quickTo(layout, "scaleY", { duration: 0.4, ease: "power3.out" });
     const applyScale = () => { toScaleX(scale); toScaleY(scale); };
 
-    // --- Zoom (wheel) ----------------------------------------------------
+    // --- Zoom (wheel), anchored to the cursor ---------------------------
     window.addEventListener("wheel", (e) => {
         e.preventDefault(); // drive the zoom instead of scrolling the page
+
+        // Capture the point under the cursor in layout-local coords. originX/Y is
+        // the untransformed centre, backed out of the live transform (so it holds
+        // through resize/scroll); dividing by the live scale removes the zoom.
+        const rect = layout.getBoundingClientRect();
+        const liveX = gsap.getProperty(layout, "x");
+        const liveY = gsap.getProperty(layout, "y");
+        const liveS = gsap.getProperty(layout, "scaleX") || 1;
+        originX = rect.left + rect.width / 2 - liveX;
+        originY = rect.top + rect.height / 2 - liveY;
+        anchorClientX = e.clientX;
+        anchorClientY = e.clientY;
+        anchorWorldX = (e.clientX - originX - liveX) / liveS;
+        anchorWorldY = (e.clientY - originY - liveY) / liveS;
+
         // Wheel down (deltaY > 0) zooms in, wheel up zooms out. Negate to flip.
         scale += e.deltaY * SENSITIVITY;
         scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+
+        panUpdater = anchoredPan; // pin the cursor point while the scale eases
         applyScale();
     }, { passive: false });
 
@@ -164,6 +201,7 @@ const dashboardControls = () => {
         startPanX = panX;
         startPanY = panY;
 
+        panUpdater = renderPan; // a lingering zoom tween shouldn't fight the drag
         layout.style.cursor = "grabbing";
     });
 
@@ -171,7 +209,7 @@ const dashboardControls = () => {
         if (e.pointerId !== activeId) return;
         panX = startPanX + (e.clientX - startX);
         panY = startPanY + (e.clientY - startY);
-        clampPan(); // instant 1:1 tracking, kept within bounds
+        renderPan(); // instant 1:1 tracking, kept within bounds
     });
 
     const endPan = (e) => {
@@ -187,15 +225,14 @@ const dashboardControls = () => {
     // layout.addEventListener("dblclick", (e) => {
     //     if (e.target.closest(".drag-element")) return; // don't hijack card dblclicks
 
+    //     panUpdater = renderPan; // ease pan freely to centre, not cursor-anchored
     //     scale = 1;
-    //     applyScale(); // eases scale back to 1x (clampPan runs each frame)
+    //     applyScale(); // eases scale back to 1x (renderPan clamps each frame)
 
-    //     // Ease the pan back to centre through the same clampPan channel so it
-    //     // never fights the scale-driven re-clamp above.
     //     const p = { px: panX, py: panY };
     //     gsap.to(p, {
     //         px: 0, py: 0, duration: 0.4, ease: "power3.out",
-    //         onUpdate: () => { panX = p.px; panY = p.py; clampPan(); },
+    //         onUpdate: () => { panX = p.px; panY = p.py; renderPan(); },
     //     });
     // });
 };
