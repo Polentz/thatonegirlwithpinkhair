@@ -1,6 +1,11 @@
 title: Site
 
 sections:
+  site:
+    type: fields
+    fields:
+      logo:
+        type: files
   pages:
     type: pages
   tools:
