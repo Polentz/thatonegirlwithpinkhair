@@ -3,3 +3,13 @@ title: Site
 sections:
   pages:
     type: pages
+  tools:
+    type: fields
+    fields:
+      staticSiteGenerator:
+        type: staticSiteGenerator
+        label: Generate static site
+        help: Exports all pages as static HTML
+        progress: Please wait, generating…
+        success: Static site generated successfully!
+        error: Something went wrong.

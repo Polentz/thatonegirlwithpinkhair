@@ -48,3 +48,5 @@ Icon
 # ---------------
 
 /site/config/.license
+
+/static/*
