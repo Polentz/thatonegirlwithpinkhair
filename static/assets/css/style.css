@@ -1,0 +1,215 @@
+@charset "UTF-8";
+
+html {
+    font-size: 100%;
+    cursor: crosshair;
+}
+
+body {
+    margin: 0 auto;
+    font-family: Helvetica, sans-serif;
+    font-size: 1.25rem;
+    color: var(--main-color);
+    /* overflow: hidden; */
+}
+
+em {
+    font-style: italic;
+}
+
+.logo {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.logo img {
+    width: 4rem;
+    transition: filter .25s ease-in-out;
+}
+
+
+body.stamp-mode .logo img {
+    filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.5)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.7)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.8));
+}
+
+.logo img:hover,
+body.stamp-mode .logo img:hover {
+    filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.3)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.3)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.2));
+}
+
+.nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.nav-label {
+    font-size: 2rem;
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 125, 0.8);
+    transition: text-shadow .25s ease-in-out;
+}
+
+.nav-label:hover {
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.2),
+        0 0 20px rgb(216, 26, 125, 0.2),
+        0 0 40px rgba(216, 26, 125, 0.2);
+}
+
+h1 {
+    width: 100%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    font-size: 4rem;
+    text-align: center;
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+    pointer-events: none;
+}
+
+.background {
+    width: 100dvw;
+    height: var(--doc-height);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.line-layout,
+.drag-layout {
+    width: 100%;
+    height: var(--doc-height);
+    position: absolute;
+    padding: 0;
+    margin: 0;
+}
+
+.block {
+    position: absolute;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    text-align: center;
+    -webkit-transition: all 0.1s;
+    -o-transition: all 0.1s;
+    transition: all 0.1s;
+    z-index: 999;
+}
+
+.block p {
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+.drag-element {
+    position: absolute;
+    -webkit-transform-origin: left;
+    -ms-transform-origin: left;
+    transform-origin: left;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity .15s ease-in-out;
+}
+
+.drag-element-wrapper {
+    position: relative;
+    width: 3vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: all;
+    box-shadow: 0 0 24px 8px rgb(216 26 125 / 30%);
+}
+
+.stamp-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 4rem;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10000;
+    display: none;
+}
+
+body.stamp-mode .stamp-cursor {
+    display: block;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hide the trailing logo while the pointer is over the nav links. */
+body.stamp-mode .stamp-cursor.over-nav {
+    transform: translate(-50%, -50%) scale(0);
+}
+
+.logo-stamp {
+    position: absolute;
+    width: 60%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.drag-element-wrapper img {
+    width: 100%;
+    display: block;
+    -o-object-fit: cover;
+    object-fit: cover;
+}
+
+.draggable {
+    cursor: move;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@media screen and (max-width: 720px) {
+
+    body {
+        font-size: 0.75rem;
+    }
+
+    h1,
+    .header .nav {
+        font-size: 1rem;
+    }
+
+    .drag-element-wrapper {
+        width: 8vw;
+        box-shadow: 0 0 8px 4px rgb(216 26 125 / 30%);
+    }
+}
