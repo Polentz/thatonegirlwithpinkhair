@@ -1,0 +1,64 @@
+/* 3D prototype page. Loaded automatically for the universe template. */
+
+.universe {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none; /* the 3D controls handle touch */
+}
+
+.universe.is-grabbing {
+    cursor: grabbing;
+}
+
+.universe.is-over-card {
+    cursor: pointer;
+}
+
+.universe canvas {
+    display: block;
+}
+
+/* The CSS3D layer for the stamped text sits on top of the WebGL canvas but
+   lets every pointer event through to it. */
+.universe .css3d-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.universe-stamp {
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 48px; /* large and scaled down in 3D, so it stays crisp up close */
+    color: var(--main-color);
+}
+
+.universe-stamp p {
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+.universe-back {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 9999;
+    color: var(--main-color);
+    text-decoration: none;
+}
+
+/* Readable by screen readers and search engines, hidden on screen. */
+.universe-fallback {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
