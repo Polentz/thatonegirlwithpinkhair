@@ -404,7 +404,7 @@ window.addEventListener("load", () => {
     // hoverInteraction();
     dragElements();
     dashboardControls();
-    logoStamp();
+    // logoStamp();
     sliders();
 });
 
