@@ -26,7 +26,8 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 // --- Scene, camera, renderers ---------------------------------------------
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
+const white = new THREE.Color(0xffffff);
+scene.background = white;
 // scene.fog = new THREE.Fog(0xffffff, 18, 60); // far clusters fade into the white
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -42,6 +43,16 @@ const cssRenderer = new CSS3DRenderer();
 cssRenderer.setSize(window.innerWidth, window.innerHeight);
 cssRenderer.domElement.classList.add("css3d-layer");
 container.appendChild(cssRenderer.domElement);
+
+// A see-through canvas on top of everything, for the close-up card only, so
+// neither other cards nor the stamped text can cover it. The close-up card is
+// moved to this three.js layer while it's away from its cluster.
+const CLOSE_UP_LAYER = 1;
+const overlayRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+overlayRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+overlayRenderer.setSize(window.innerWidth, window.innerHeight);
+overlayRenderer.domElement.classList.add("closeup-layer");
+container.appendChild(overlayRenderer.domElement);
 
 // --- Placement --------------------------------------------------------------
 
@@ -117,7 +128,7 @@ data.forEach((clusterData, i) => {
 
         const holder = new THREE.Group();
         holder.position.copy(offsets[j]);
-        holder.userData = { home: offsets[j].clone(), width, height };
+        holder.userData = { home: offsets[j].clone(), width, height, text: clusterData.text };
         holder.add(glow, card);
         group.add(holder);
 
@@ -152,6 +163,7 @@ const stamp = (html, point) => {
 // --- Pointer: click a card to stamp ---------------------------------------------
 
 const raycaster = new THREE.Raycaster();
+raycaster.layers.enableAll(); // the close-up card is on its own layer but still clickable
 const pointer = new THREE.Vector2();
 
 const aimAt = (e) => {
@@ -174,11 +186,27 @@ let focusTarget = null; // cluster centre the view is easing towards
 // Presses go to OrbitControls as usual (dragging anywhere orbits); a press
 // that ends where it started is a click, and stamps the card under it.
 renderer.domElement.addEventListener("pointerdown", (e) => {
+    if (press) {
+        // A second finger while one is down: a pinch zoom, not a click.
+        press = null;
+        closeUp(null);
+        return;
+    }
     if (e.button === 0) press = { id: e.pointerId, x: e.clientX, y: e.clientY };
 });
 
+// Zooming (wheel or trackpad) also sends the close-up card back.
+renderer.domElement.addEventListener("wheel", () => closeUp(null), { passive: true });
+
 renderer.domElement.addEventListener("pointermove", (e) => {
-    if (!press) container.classList.toggle("is-over-card", !!pickCard(e));
+    if (!press) {
+        container.classList.toggle("is-over-card", !!pickCard(e));
+        return;
+    }
+    // Once a press turns into a drag (an orbit), send the close-up card back.
+    if (e.pointerId === press.id && Math.hypot(e.clientX - press.x, e.clientY - press.y) > DRAG_SLOP) {
+        closeUp(null);
+    }
 });
 
 const release = (e) => {
@@ -209,10 +237,32 @@ document.addEventListener("keydown", (e) => {
 let closeUpHolder = null;
 const moving = new Set(); // cards on their way to or from the close-up spot
 
+// Caption with the cluster's text under the close-up card. HTML on top of
+// every canvas, moved each frame to follow the card's bottom edge.
+const caption = document.createElement("div");
+caption.className = "closeup-caption";
+container.appendChild(caption);
+
 const closeUp = (holder) => {
     if (closeUpHolder) moving.add(closeUpHolder); // the previous one heads home
     closeUpHolder = holder;
-    if (holder) moving.add(holder);
+    if (holder) {
+        holder.traverse((object) => object.layers.set(CLOSE_UP_LAYER));
+        moving.add(holder);
+        if (holder.userData.text) caption.innerHTML = `<p>${holder.userData.text}</p>`;
+    }
+    caption.classList.toggle("is-visible", !!holder?.userData.text);
+};
+
+const captionAnchor = new THREE.Vector3();
+
+const updateCaption = () => {
+    if (!closeUpHolder) return; // keeps its last spot while fading out
+    closeUpHolder.updateWorldMatrix(true, false);
+    closeUpHolder.localToWorld(captionAnchor.set(0, -closeUpHolder.userData.height / 2, 0));
+    captionAnchor.project(camera);
+    caption.style.left = `${(captionAnchor.x + 1) / 2 * window.innerWidth}px`;
+    caption.style.top = `${(1 - captionAnchor.y) / 2 * window.innerHeight}px`;
 };
 
 const closeUpSpot = new THREE.Vector3();
@@ -243,6 +293,7 @@ const updateCloseUp = () => {
             if (holder.position.distanceTo(home) < 0.001) {
                 holder.position.copy(home);
                 holder.scale.copy(homeScale);
+                holder.traverse((object) => object.layers.set(0)); // back in the scene
                 moving.delete(holder);
             }
         }
@@ -276,6 +327,7 @@ renderer.setAnimationLoop(() => {
     }
     controls.update();
     updateCloseUp();
+    updateCaption();
 
     // Cards and stamps always face the viewer.
     holders.forEach((holder) => holder.quaternion.copy(camera.quaternion));
@@ -283,6 +335,13 @@ renderer.setAnimationLoop(() => {
 
     renderer.render(scene, camera);
     cssRenderer.render(scene, camera);
+
+    // Close-up layer on top, without the white background.
+    camera.layers.set(CLOSE_UP_LAYER);
+    scene.background = null;
+    overlayRenderer.render(scene, camera);
+    scene.background = white;
+    camera.layers.set(0);
 });
 
 window.addEventListener("resize", () => {
@@ -290,4 +349,5 @@ window.addEventListener("resize", () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    overlayRenderer.setSize(window.innerWidth, window.innerHeight);
 });

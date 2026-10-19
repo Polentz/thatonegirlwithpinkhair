@@ -21,9 +21,10 @@
     display: block;
 }
 
-/* The CSS3D layer for the stamped text sits on top of the WebGL canvas but
-   lets every pointer event through to it. */
-.universe .css3d-layer {
+/* The CSS3D layer for the stamped text and the close-up canvas sit on top of
+   the main WebGL canvas but let every pointer event through to it. */
+.universe .css3d-layer,
+.universe .closeup-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -42,6 +43,38 @@
         0 0 10px rgb(216, 26, 125, 0.5),
         0 0 20px rgb(216, 26, 125, 0.7),
         0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+/* Caption under the close-up image; script sets left/top to the image's
+   bottom-centre. */
+.closeup-caption {
+    position: absolute;
+    max-width: 80vw;
+    transform: translate(-50%, 1rem);
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--main-color);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+}
+
+.closeup-caption.is-visible {
+    opacity: 1;
+}
+
+.closeup-caption p {
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .closeup-caption {
+        transition: none;
+    }
 }
 
 .universe-back {
