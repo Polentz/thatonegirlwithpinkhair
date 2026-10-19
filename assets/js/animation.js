@@ -1,17 +1,27 @@
-let count = 0;
-
+// The last stamp and the lines are kept in .drag-layout's own (unzoomed)
+// coordinates, like the stamped text, so they zoom and pan with the images.
 let startX;
 let startY;
 
 let paths = [];
+
+// How .drag-layout currently sits on the canvas: its zoom and the canvas
+// position of its top-left corner.
+const layoutTransform = () => {
+    const layout = document.querySelector(".drag-layout");
+    const canvas = document.querySelector("canvas");
+    if (!layout || !canvas) return { s: 1, x: 0, y: 0 };
+    const r = layout.getBoundingClientRect();
+    const c = canvas.getBoundingClientRect();
+    return { s: r.width / layout.offsetWidth, x: r.left - c.left, y: r.top - c.top };
+};
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     startX = windowWidth / 2;
     startY = windowHeight / 2;
 
-    blocks = Array.from(document.querySelectorAll(".blocks-stored p"))
-        .map(p => p.outerHTML);
+    hasClusterText = !!document.querySelector(".cluster-text");
 };
 
 // While a drag-element is dragged it calls preventDefault on the pointer
@@ -38,14 +48,18 @@ window.clearGuidePointer = () => {
 function draw() {
     background(255, 255, 255);
 
-    if (count < blocks.length && !document.body.classList.contains("stamp-mode")) {
+    const t = layoutTransform();
+
+    if (hasClusterText && !document.body.classList.contains("stamp-mode")) {
+        // The guide runs from the last stamp (layout coords) to the pointer
+        // (canvas coords), so convert the pointer back into layout coords.
         const aim = guidePointer || { x: mouseX, y: mouseY };
-        let guide = new Path(startX, startY, aim.x, aim.y);
-        guide.show();
+        let guide = new Path(startX, startY, (aim.x - t.x) / t.s, (aim.y - t.y) / t.s);
+        guide.show(t);
     };
 
     for (let i = 0; i < paths.length; i++) {
-        paths[i].show();
+        paths[i].show(t);
     };
 };
 
@@ -57,8 +71,7 @@ function windowResized() {
 
 function resetMap() {
     paths = [];
-    document.querySelectorAll(".block").remove();
-    count = 0;
+    document.querySelectorAll(".block").forEach((block) => block.remove());
 };
 
 // function mouseMoved() {
@@ -73,22 +86,20 @@ function resetMap() {
 //     startY = newEndY;
 // };
 
-function mousePressed(event) {
-    if (document.body.classList.contains("stamp-mode")) return; // don't draw/place while stamping
-    if (event && event.target.closest(".logo")) return;
-    if (event && event.target.closest(".nav-label")) return;
-    if (event && event.target.closest(".drag-element")) return;
-    if (event && event.target.closest(".slider")) return;
+// Called by a cluster click (script.js) with the cluster's text HTML and the
+// click position: draws the line from the last stamp and places the text.
+window.stampText = (html, clientX, clientY) => {
+    const layout = document.querySelector(".drag-layout");
+    const rect = layout.getBoundingClientRect();
+    const s = rect.width / layout.offsetWidth;
+    const x = (clientX - rect.left) / s;
+    const y = (clientY - rect.top) / s;
 
-    let newEndX = mouseX;
-    let newEndY = mouseY;
-    let p = new Path(startX, startY, newEndX, newEndY);
+    paths.push(new Path(startX, startY, x, y));
+    startX = x;
+    startY = y;
 
-    startX = newEndX;
-    startY = newEndY;
-
-    placeItem(mouseX, mouseY);
-    paths.push(p);
+    placeItem(html, x, y);
 };
 
 class Path {
@@ -100,43 +111,28 @@ class Path {
         this.endY = y2;
     }
 
-    show() {
+    // `t` is layoutTransform(): maps layout coords onto the canvas.
+    show(t) {
         stroke(216, 26, 125);
         strokeWeight(1);
-        line(this.startX, this.startY, this.endX, this.endY)
+        line(
+            t.x + this.startX * t.s, t.y + this.startY * t.s,
+            t.x + this.endX * t.s, t.y + this.endY * t.s
+        );
     }
 };
 
 
-let blocks = [];
+let hasClusterText = false;
 
-function placeItem(x, y) {
-
-    // let DOM_DIV = document.createElement('div');
-    // DOM_DIV.innerHTML = blocks[count];
-
-    // DOM_DIV.style.top = y + 'px';
-    // DOM_DIV.style.left = x + 'px';
-
-    // let class_name = "block";
-    // DOM_DIV.setAttribute("class", class_name);
-
-    // if (count < blocks.length) {
-    //     document.querySelector(".blocks").append(DOM_DIV);
-    //     count++;
-    // }
-    if (blocks.length === 0) return;
-
+function placeItem(html, x, y) {
     let DOM_DIV = document.createElement('div');
-    DOM_DIV.innerHTML = blocks[count];
+    DOM_DIV.innerHTML = html;
 
     DOM_DIV.style.top = y + 'px';
     DOM_DIV.style.left = x + 'px';
 
-    let class_name = "block";
-    DOM_DIV.setAttribute("class", class_name);
+    DOM_DIV.setAttribute("class", "block");
 
-    document.querySelector(".blocks").append(DOM_DIV);
-
-    count = (count + 1) % blocks.length;
+    document.querySelector(".drag-layout").append(DOM_DIV);
 };

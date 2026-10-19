@@ -6,6 +6,8 @@ const documentHeight = () => {
 
 // Makes `target` follow the pointer while `handle` is dragged.
 // Delta-based, so it works regardless of any transform on the target.
+// The target is kept inside its offset parent (its .cluster) and stops when it
+// bumps into a sibling image.
 const makeDraggable = (handle, target) => {
     let dragZ = 1000;
     handle.style.touchAction = "none"; // don't scroll/zoom the page while dragging on touch
@@ -33,8 +35,20 @@ const makeDraggable = (handle, target) => {
         // Divide the screen-pixel delta by the current zoom so the element
         // keeps tracking the pointer 1:1 even when .drag-layout is scaled.
         const zoom = window.getDragZoom?.() ?? 1;
-        target.style.left = `${startLeft + (e.clientX - startX) / zoom}px`;
-        target.style.top = `${startTop + (e.clientY - startY) / zoom}px`;
+        const bounds = target.offsetParent;
+        const maxLeft = Math.max(0, bounds.clientWidth - target.offsetWidth);
+        const maxTop = Math.max(0, bounds.clientHeight - target.offsetHeight);
+        const left = Math.min(maxLeft, Math.max(0, startLeft + (e.clientX - startX) / zoom));
+        const top = Math.min(maxTop, Math.max(0, startTop + (e.clientY - startY) / zoom));
+
+        // Move to the new spot if it's free; otherwise slide along whichever
+        // axis is still free, or stay put.
+        const curLeft = target.offsetLeft;
+        const curTop = target.offsetTop;
+        const [nextLeft, nextTop] = [[left, top], [left, curTop], [curLeft, top]]
+            .find(([l, t]) => !hitsSibling(target, l, t)) ?? [curLeft, curTop];
+        target.style.left = `${nextLeft}px`;
+        target.style.top = `${nextTop}px`;
         window.setGuidePointer?.(e.clientX, e.clientY); // keep the p5 guide line tracking
     });
 
@@ -46,6 +60,21 @@ const makeDraggable = (handle, target) => {
     };
     handle.addEventListener("pointerup", endDrag);
     handle.addEventListener("pointercancel", endDrag);
+};
+
+// True if `target` placed at (left, top) would overlap another image in the
+// same cluster.
+const hitsSibling = (target, left, top) => {
+    const width = target.offsetWidth;
+    const height = target.offsetHeight;
+    return Array.from(target.parentElement.children).some((other) =>
+        other !== target &&
+        other.classList.contains("drag-element") &&
+        left < other.offsetLeft + other.offsetWidth &&
+        left + width > other.offsetLeft &&
+        top < other.offsetTop + other.offsetHeight &&
+        top + height > other.offsetTop
+    );
 };
 
 const dragElements = () => {
@@ -211,6 +240,10 @@ const dashboardControls = () => {
 
         panUpdater = renderPan; // a lingering zoom tween shouldn't fight the drag
         layout.style.cursor = "grabbing";
+        // Promote the layout to its own GPU layer while panning, so moving it
+        // doesn't repaint every image and glow on each frame. Only during the
+        // pan: left on, zoom would scale a stale bitmap and look blurry.
+        layout.style.willChange = "transform";
     });
 
     layout.addEventListener("pointermove", (e) => {
@@ -224,6 +257,7 @@ const dashboardControls = () => {
         if (e.pointerId !== activeId) return;
         layout.releasePointerCapture(activeId);
         activeId = null;
+        layout.style.willChange = "";
         updateCursor(); // back to grab if still zoomed in, else default
     };
     layout.addEventListener("pointerup", endPan);
@@ -353,56 +387,119 @@ const sliders = () => {
     });
 };
 
-const positionDragElements = () => {
-    const container = document.querySelector(".drag-layout");
-    if (!container) return;
+// Clicking a cluster (not dragging inside it) stamps that cluster's text at
+// the click point. Every click adds another copy.
+const clusterStamps = () => {
+    const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click
 
-    const elements = Array.from(document.querySelectorAll(".drag-element"));
+    document.querySelectorAll(".cluster").forEach((cluster) => {
+        const text = cluster.querySelector(".cluster-text")?.innerHTML.trim();
+        if (!text) return;
+
+        let downX = 0, downY = 0;
+        cluster.addEventListener("pointerdown", (e) => {
+            downX = e.clientX;
+            downY = e.clientY;
+        });
+
+        cluster.addEventListener("click", (e) => {
+            if (document.body.classList.contains("stamp-mode")) return; // logo stamping instead
+            if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged
+            window.stampText?.(text, e.clientX, e.clientY);
+        });
+    });
+};
+
+// Scatters clusters across the layout without overlap, then scatters each
+// cluster's images inside it.
+const IMAGE_GAP = 16;   // min px between images inside a cluster
+const CLUSTER_GAP = 40; // min px between clusters
+const CLUSTER_ROOM = 1.5; // cell size vs. largest image: >1 leaves room to scatter and drag
+
+// Sizes each cluster to fit its images, scatters the images inside it, then
+// scatters the clusters across the layout. Nothing overlaps.
+const positionDragElements = () => {
+    const layout = document.querySelector(".drag-layout");
+    if (!layout) return;
+
+    const clusters = Array.from(layout.querySelectorAll(".cluster"));
+
+    clusters.forEach((cluster) => {
+        const images = Array.from(cluster.querySelectorAll(".drag-element"));
+        const maxW = Math.max(...images.map((el) => el.offsetWidth));
+        const maxH = Math.max(...images.map((el) => el.offsetHeight));
+        const cols = Math.ceil(Math.sqrt(images.length));
+        const rows = Math.ceil(images.length / cols);
+
+        cluster.style.width = `${cols * (maxW * CLUSTER_ROOM + IMAGE_GAP)}px`;
+        cluster.style.height = `${rows * (maxH * CLUSTER_ROOM + IMAGE_GAP)}px`;
+        scatter(cluster, images, IMAGE_GAP);
+    });
+
+    scatter(layout, clusters, CLUSTER_GAP);
+
+    gsap.to(".drag-element", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
+};
+
+// Places `elements` at random inside `container` without overlap: the
+// container is split into a grid with at least one cell per element, each
+// element gets its own random cell and a random spot inside it, keeping `gap`
+// px clear of the cell edges' neighbours.
+const scatter = (container, elements, gap) => {
+    if (!elements.length) return;
+
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
-    const gap = 10; // minimum space kept between elements
-    const maxAttempts = 300;
-    const placed = []; // bounding boxes already positioned
+    const maxW = Math.max(...elements.map((el) => el.offsetWidth));
+    const maxH = Math.max(...elements.map((el) => el.offsetHeight));
 
-    elements.forEach(element => {
+    // Pick the grid shape that leaves the most free room around the largest
+    // element, so the grid follows the container's proportions.
+    let cols = 1;
+    let bestRoom = -Infinity;
+    for (let c = 1; c <= elements.length; c++) {
+        const r = Math.ceil(elements.length / c);
+        const room = Math.min(containerWidth / c - maxW, containerHeight / r - maxH);
+        if (room > bestRoom) {
+            bestRoom = room;
+            cols = c;
+        }
+    }
+    const rows = Math.ceil(elements.length / cols);
+    const cellW = containerWidth / cols;
+    const cellH = containerHeight / rows;
+    // Shrink the gap when cells are tight (e.g. on phones) rather than push
+    // elements into the neighbouring cell.
+    const gapX = Math.max(0, Math.min(gap, cellW - maxW));
+    const gapY = Math.max(0, Math.min(gap, cellH - maxH));
+
+    // Shuffle the cells so empty ones end up in random places.
+    const cells = Array.from({ length: cols * rows }, (_, i) => i);
+    for (let i = cells.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
+
+    elements.forEach((element, i) => {
         element.style.right = "auto";
         element.style.bottom = "auto";
 
-        const rect = element.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
+        const col = cells[i] % cols;
+        const row = Math.floor(cells[i] / cols);
+        const freeX = Math.max(0, cellW - element.offsetWidth - gapX);
+        const freeY = Math.max(0, cellH - element.offsetHeight - gapY);
 
-        const maxLeft = Math.max(0, containerWidth - width);
-        const maxTop = Math.max(0, containerHeight - height);
-
-        let left = 0;
-        let top = 0;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            left = Math.random() * maxLeft;
-            top = Math.random() * maxTop;
-
-            const overlaps = placed.some(box =>
-                left < box.left + box.width + gap &&
-                left + width + gap > box.left &&
-                top < box.top + box.height + gap &&
-                top + height + gap > box.top
-            );
-
-            if (!overlaps) break; // found a free spot, keep this position
-        }
-
-        placed.push({ left, top, width, height });
-        element.style.left = `${left}px`;
-        element.style.top = `${top}px`;
+        element.style.left = `${col * cellW + gapX / 2 + Math.random() * freeX}px`;
+        element.style.top = `${row * cellH + gapY / 2 + Math.random() * freeY}px`;
     });
-    gsap.to(elements, { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
 };
 
 window.addEventListener("load", () => {
     documentHeight();
     positionDragElements();
     // hoverInteraction();
-    dragElements();
+    // dragElements();
+    clusterStamps();
     dashboardControls();
     // logoStamp();
     sliders();

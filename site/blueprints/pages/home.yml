@@ -1,13 +1,21 @@
 title: You're logged in as that one girl with pink hair
 
-columns:
-  main:
-    width: 2/3
-    sections:
-      images:
-        type: fields
+sections:
+  content:
+    type: fields
+    fields:
+      clusters:
+        label: Clusters
+        type: structure
+        help: Each cluster is a group of images. Clicking the cluster stamps its text.
+        columns:
+          images:
+            width: 2/3
+          text:
+            width: 1/3
         fields:
-          gallery:
+          images:
+            label: Images
             type: files
             template: image
             uploads: image
@@ -17,13 +25,14 @@ columns:
               ratio: 4/3
               back: white
               cover: true
-  sidebar:
-    width: 1/3
-    sections:
-      content:
-        type: fields
-        fields:
-          blocks:
-            type: blocks
-            fieldsets:
-              - text
+          text:
+            label: Text
+            type: writer
+            marks:
+              - bold
+              - italic
+              - underline
+              - strike
+              - link
+              - clear
+            nodes: false

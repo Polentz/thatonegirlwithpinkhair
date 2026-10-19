@@ -102,7 +102,6 @@ h1 {
     pointer-events: none;
 }
 
-.line-layout,
 .drag-layout {
     width: 100%;
     height: var(--doc-height);
@@ -122,6 +121,8 @@ h1 {
     -o-transition: all 0.1s;
     transition: all 0.1s;
     z-index: 999;
+    pointer-events: none;
+    /* stamps sit inside .drag-layout; let clicks reach the clusters */
 }
 
 .block p {
@@ -130,6 +131,14 @@ h1 {
         0 0 10px rgb(216, 26, 125, 0.5),
         0 0 20px rgb(216, 26, 125, 0.7),
         0 0 40px rgba(216, 26, 124, 0.8);
+}
+
+/* Invisible box that holds a group of images. Its images are scattered and
+   dragged inside it; clicking it stamps the cluster's text. Its size is set
+   by script.js to fit its images. */
+.cluster {
+    position: absolute;
+    /* background: red */
 }
 
 .drag-element {
@@ -190,7 +199,7 @@ body.stamp-mode .stamp-cursor.over-nav {
 }
 
 .draggable {
-    cursor: move;
+    cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
