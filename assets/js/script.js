@@ -317,32 +317,39 @@ const logoStamp = () => {
 };
 
 // Info link toggles the side panel; Escape or a click outside closes it.
-const infoSlider = () => {
-    const slider = document.querySelector(".slider");
-    const toggle = document.querySelector(".info-toggle");
-    if (!slider || !toggle) return;
+// Each .slider-toggle opens the panel named by its aria-controls. Only one
+// panel is open at a time; the X, Escape or a click outside closes it.
+const sliders = () => {
+    const pairs = Array.from(document.querySelectorAll(".slider-toggle"))
+        .map((toggle) => ({ toggle, slider: document.getElementById(toggle.getAttribute("aria-controls")) }))
+        .filter(({ slider }) => slider);
+    if (!pairs.length) return;
 
-    const setOpen = (open) => {
+    const setOpen = ({ toggle, slider }, open) => {
         slider.classList.toggle("is-open", open);
         slider.setAttribute("aria-hidden", String(!open));
         toggle.setAttribute("aria-expanded", String(open));
     };
+    const closeAll = () => pairs.forEach((pair) => setOpen(pair, false));
 
-    toggle.addEventListener("click", (e) => {
-        e.preventDefault();
-        setOpen(!slider.classList.contains("is-open"));
+    pairs.forEach((pair) => {
+        pair.toggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            const wasOpen = pair.slider.classList.contains("is-open");
+            closeAll();
+            if (!wasOpen) setOpen(pair, true);
+        });
+
+        pair.slider.querySelector(".slider-close")?.addEventListener("click", () => setOpen(pair, false));
     });
 
-    slider.querySelector(".slider-close")?.addEventListener("click", () => setOpen(false));
-
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") setOpen(false);
+        if (e.key === "Escape") closeAll();
     });
 
     document.addEventListener("click", (e) => {
-        if (!slider.classList.contains("is-open")) return;
-        if (slider.contains(e.target) || toggle.contains(e.target)) return;
-        setOpen(false);
+        if (e.target.closest(".slider, .slider-toggle")) return;
+        closeAll();
     });
 };
 
@@ -398,7 +405,7 @@ window.addEventListener("load", () => {
     dragElements();
     dashboardControls();
     logoStamp();
-    infoSlider();
+    sliders();
 });
 
 window.addEventListener("resize", () => {

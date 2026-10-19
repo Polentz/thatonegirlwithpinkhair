@@ -17,6 +17,18 @@ sections:
           - link
           - clear
         nodes: false
+      contactText:
+        label: Contact Text
+        type: writer
+        marks:
+          - bold
+          - italic
+          - underline
+          - strike
+          - link
+          - email
+          - clear
+        nodes: false
   pages:
     type: pages
 

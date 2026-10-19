@@ -23,5 +23,6 @@
         </div>
     <?php endforeach ?>
 </section>
-<?= snippet('info') ?>
+<?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
+<?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
 <?= snippet('foot') ?>
