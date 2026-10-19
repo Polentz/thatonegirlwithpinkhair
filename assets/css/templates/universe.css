@@ -6,7 +6,8 @@
     z-index: 1;
     overflow: hidden;
     cursor: grab;
-    touch-action: none; /* the 3D controls handle touch */
+    touch-action: none;
+    /* the 3D controls handle touch */
 }
 
 .universe.is-grabbing {
@@ -21,28 +22,12 @@
     display: block;
 }
 
-/* The CSS3D layer for the stamped text and the close-up canvas sit on top of
-   the main WebGL canvas but let every pointer event through to it. */
-.universe .css3d-layer,
+/* The close-up canvas sits on top of the main WebGL canvas but lets every
+   pointer event through to it. */
 .universe .closeup-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
-}
-
-.universe-stamp {
-    pointer-events: none;
-    white-space: nowrap;
-    font-size: 48px; /* large and scaled down in 3D, so it stays crisp up close */
-    color: var(--main-color);
-}
-
-.universe-stamp p {
-    text-shadow:
-        0 0 5px rgba(216, 26, 125, 0.2),
-        0 0 10px rgb(216, 26, 125, 0.5),
-        0 0 20px rgb(216, 26, 125, 0.7),
-        0 0 40px rgba(216, 26, 124, 0.8);
 }
 
 /* Caption under the close-up image; script sets left/top to the image's

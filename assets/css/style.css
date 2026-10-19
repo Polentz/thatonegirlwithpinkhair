@@ -73,16 +73,16 @@ body.stamp-mode .logo img:hover {
 h1 {
     width: 100%;
     position: fixed;
-    top: 50%;
+    /* top: 50%;
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    /* top: 2rem;
-    left: 2rem; */
+    transform: translate(-50%, -50%); */
+    top: 1rem;
+    left: 1rem;
     z-index: 9999;
     font-size: 4rem;
-    text-align: center;
+    /* text-align: center; */
     font-size: 2rem;
 
     text-shadow:
@@ -247,7 +247,7 @@ body.stamp-mode .stamp-cursor.over-nav {
     top: 0;
     display: flex;
     justify-content: flex-end;
-    padding: 2rem 2rem;
+    padding: 1rem;
 }
 
 .slider-close {
@@ -275,11 +275,11 @@ body.stamp-mode .stamp-cursor.over-nav {
 }
 
 .slider-content {
-    font-size: 2rem;
+    /* font-size: 2rem; */
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    padding: 2rem;
+    gap: 1rem;
+    padding: 1rem;
 }
 
 scrollbar {

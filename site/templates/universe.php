@@ -31,7 +31,7 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
     <?php endforeach ?>
 </ul>
 
-<a class="universe-back nav-label" href="<?= url() ?>">2D</a>
+<!-- <a class="universe-back nav-label" href="<?= url() ?>">2D</a> -->
 
 <script type="importmap">
     {

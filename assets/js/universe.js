@@ -1,12 +1,12 @@
 // 3D prototype: the home page clusters float in space as groups of image
 // cards. Drag empty space to orbit, wheel/pinch to zoom, right-drag to pan.
-// Clicking a card stamps its cluster's text at that spot, linked to the
-// previous stamp by a pink line, and brings that card up close; it floats back
-// on the next click, or Escape. Dragging on a card orbits, like empty space.
+// The first click on a card marks a glowing dot; each later click draws a pink
+// line from the previous click to that spot. A click also brings the card up close, captioned with its cluster's text; it floats back
+// on the next click, drag, zoom or Escape. Each cluster shows its text among
+// its images. Dragging on a card orbits, like empty space.
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { CSS3DRenderer, CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
 
 const PINK = 0xd81a7d;
 const CARD_SIZE = 2;          // longest side of an image card, in world units 1.2
@@ -14,7 +14,8 @@ const CARD_SPACING = 10;       // min distance between cards in a cluster 1.4
 const CLUSTER_RADIUS = 5;     // cards stay within this distance of their cluster's centre 2.4
 const CLUSTER_SPACING = 2 * CLUSTER_RADIUS + 2.5; // min distance between cluster centres 
 const UNIVERSE_RADIUS = 16;     // clusters are scattered inside this sphere 16
-const STAMP_SCALE = 0.01;       // CSS px → world units for the stamped text 0.01
+const TEXT_LINE_HEIGHT = CARD_SIZE * 0.25; // height of one line of cluster text
+const TEXT_MAX_WIDTH = CARD_SIZE * 2;      // cluster text wraps beyond this width
 const CLOSE_UP_DISTANCE = 6;    // how far in front of the camera a clicked card floats
 const CLOSE_UP_SIZE = 0.6;      // share of the screen the close-up card fills
 const DRAG_SLOP = 5;            // px of movement that counts as a drag, not a click 5
@@ -38,14 +39,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
-// Stamped text is real HTML placed in 3D, so it keeps the site's font and glow.
-const cssRenderer = new CSS3DRenderer();
-cssRenderer.setSize(window.innerWidth, window.innerHeight);
-cssRenderer.domElement.classList.add("css3d-layer");
-container.appendChild(cssRenderer.domElement);
-
 // A see-through canvas on top of everything, for the close-up card only, so
-// neither other cards nor the stamped text can cover it. The close-up card is
+// no other card can cover it. The close-up card is
 // moved to this three.js layer while it's away from its cluster.
 const CLOSE_UP_LAYER = 1;
 const overlayRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -64,14 +59,15 @@ const randomInSphere = (radius) => {
     return v.multiplyScalar(radius);
 };
 
-// `count` random points inside a sphere, trying to keep `minDistance` apart.
-const scatterPoints = (count, radius, minDistance) => {
+// `count` random points inside a sphere, trying to keep `minDistance` apart
+// from each other and from any points already `taken`.
+const scatterPoints = (count, radius, minDistance, taken = []) => {
     const points = [];
     for (let i = 0; i < count; i++) {
         let point;
         for (let attempt = 0; attempt < 300; attempt++) {
             point = randomInSphere(radius);
-            if (points.every((other) => other.distanceTo(point) >= minDistance)) break;
+            if ([...taken, ...points].every((other) => other.distanceTo(point) >= minDistance)) break;
         }
         points.push(point);
     }
@@ -97,9 +93,65 @@ const glowMaterial = (() => {
     });
 })();
 
+// The cluster's text as a glowing pink label drawn into the 3D scene, so cards
+// in front of it can cover it. Wrapped to TEXT_MAX_WIDTH.
+const makeTextLabel = (html) => {
+    const text = new DOMParser().parseFromString(html, "text/html").body.textContent.trim();
+
+    const fontSize = 64;
+    const lineHeight = fontSize * 1.2;
+    const glowScale = fontSize / 20; // the site's glow is sized for ~20px text
+    const glows = [[40, 0.8], [20, 0.7], [10, 0.5], [5, 0.2]]; // same layers as the CSS text-shadow
+    const padding = 40 * glowScale;
+    const pxPerUnit = lineHeight / TEXT_LINE_HEIGHT;
+    const font = `${fontSize}px Helvetica, Arial, sans-serif`;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.font = font;
+
+    const lines = [];
+    let line = "";
+    text.split(/\s+/).forEach((word) => {
+        const candidate = line ? `${line} ${word}` : word;
+        if (line && ctx.measureText(candidate).width > TEXT_MAX_WIDTH * pxPerUnit) {
+            lines.push(line);
+            line = word;
+        } else {
+            line = candidate;
+        }
+    });
+    if (line) lines.push(line);
+
+    const textWidth = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    canvas.width = Math.ceil(textWidth + padding * 2);
+    canvas.height = Math.ceil(lines.length * lineHeight + padding * 2);
+
+    // Resizing the canvas resets the context, so set it up again.
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgb(216, 26, 125)";
+    glows.forEach(([blur, alpha]) => {
+        ctx.shadowColor = `rgba(216, 26, 125, ${alpha})`;
+        ctx.shadowBlur = blur * glowScale;
+        lines.forEach((l, i) => ctx.fillText(l, canvas.width / 2, padding + lineHeight * (i + 0.5)));
+    });
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const label = new THREE.Mesh(
+        new THREE.PlaneGeometry(canvas.width / pxPerUnit, canvas.height / pxPerUnit),
+        new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
+    );
+    label.raycast = () => { }; // not clickable
+    return label;
+};
+
 const loader = new THREE.TextureLoader();
 const cards = [];   // card meshes, for picking
-const holders = []; // card + glow pairs, turned to face the camera every frame
+const holders = []; // card + glow pairs and text labels, turned to face the camera every frame
 
 const clusterCentres = scatterPoints(data.length, UNIVERSE_RADIUS, CLUSTER_SPACING);
 
@@ -109,7 +161,16 @@ data.forEach((clusterData, i) => {
     scene.add(group);
 
     const cluster = { group, text: clusterData.text };
-    const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING);
+
+    // The text sits at the cluster's centre; the cards keep clear of it.
+    const taken = [];
+    if (clusterData.text) {
+        const label = makeTextLabel(clusterData.text);
+        group.add(label);
+        holders.push(label); // faces the camera like the cards
+        taken.push(new THREE.Vector3());
+    }
+    const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
 
     clusterData.images.forEach((image, j) => {
         const width = image.ratio >= 1 ? CARD_SIZE : CARD_SIZE * image.ratio;
@@ -141,23 +202,41 @@ data.forEach((clusterData, i) => {
 // --- Stamps -------------------------------------------------------------------
 
 const lineMaterial = new THREE.LineBasicMaterial({ color: PINK });
-const stamps = [];
-const lastStamp = new THREE.Vector3(0, 0, 0); // the first line starts at the centre
+let lastStamp = null; // where the last click landed; null until the first one
 
-const stamp = (html, point) => {
-    const geometry = new THREE.BufferGeometry().setFromPoints([lastStamp.clone(), point.clone()]);
-    scene.add(new THREE.Line(geometry, lineMaterial));
-    lastStamp.copy(point);
+// Glowing pink dot marking where the trail starts.
+const makeStartDot = (point) => {
+    const size = 128;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, "rgba(216, 26, 125, 1)");
+    gradient.addColorStop(0.15, "rgba(216, 26, 125, 1)");
+    gradient.addColorStop(0.3, "rgba(216, 26, 125, 0.5)");
+    gradient.addColorStop(1, "rgba(216, 26, 125, 0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
 
-    const element = document.createElement("div");
-    element.className = "universe-stamp";
-    element.innerHTML = `<p>${html}</p>`;
+    const dot = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: new THREE.CanvasTexture(canvas),
+        depthWrite: false,
+    }));
+    dot.position.copy(point);
+    dot.scale.setScalar(CARD_SIZE * 0.25);
+    return dot;
+};
 
-    const label = new CSS3DObject(element);
-    label.position.copy(point);
-    label.scale.setScalar(STAMP_SCALE);
-    scene.add(label);
-    stamps.push(label);
+// The first click marks the start with a dot; later ones draw a line from the
+// previous click to `point`.
+const stamp = (point) => {
+    if (lastStamp) {
+        const geometry = new THREE.BufferGeometry().setFromPoints([lastStamp.clone(), point.clone()]);
+        scene.add(new THREE.Line(geometry, lineMaterial));
+    } else {
+        scene.add(makeStartDot(point));
+    }
+    lastStamp = point.clone();
 };
 
 // --- Pointer: click a card to stamp ---------------------------------------------
@@ -184,7 +263,7 @@ let press = null;       // where the current press started, to tell a click from
 let focusTarget = null; // cluster centre the view is easing towards
 
 // Presses go to OrbitControls as usual (dragging anywhere orbits); a press
-// that ends where it started is a click, and stamps the card under it.
+// that ends where it started is a click on the card under it.
 renderer.domElement.addEventListener("pointerdown", (e) => {
     if (press) {
         // A second finger while one is down: a pinch zoom, not a click.
@@ -221,7 +300,7 @@ const release = (e) => {
     const { cluster, holder } = hit.object.userData;
     if (holder === closeUpHolder) return closeUp(null); // clicking it again sends it back
 
-    if (cluster.text) stamp(cluster.text, hit.point);
+    stamp(hit.point);
     focusTarget = cluster.group.position.clone(); // turn the view towards it
     closeUp(holder);
 };
@@ -329,12 +408,10 @@ renderer.setAnimationLoop(() => {
     updateCloseUp();
     updateCaption();
 
-    // Cards and stamps always face the viewer.
+    // Cards always face the viewer.
     holders.forEach((holder) => holder.quaternion.copy(camera.quaternion));
-    stamps.forEach((label) => label.quaternion.copy(camera.quaternion));
 
     renderer.render(scene, camera);
-    cssRenderer.render(scene, camera);
 
     // Close-up layer on top, without the white background.
     camera.layers.set(CLOSE_UP_LAYER);
@@ -348,6 +425,5 @@ window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    cssRenderer.setSize(window.innerWidth, window.innerHeight);
     overlayRenderer.setSize(window.innerWidth, window.innerHeight);
 });
