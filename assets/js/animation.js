@@ -78,6 +78,7 @@ function mousePressed(event) {
     if (event && event.target.closest(".logo")) return;
     if (event && event.target.closest(".nav-label")) return;
     if (event && event.target.closest(".drag-element")) return;
+    if (event && event.target.closest(".slider")) return;
 
     let newEndX = mouseX;
     let newEndY = mouseY;

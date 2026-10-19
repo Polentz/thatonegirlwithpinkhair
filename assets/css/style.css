@@ -197,10 +197,101 @@ body.stamp-mode .stamp-cursor.over-nav {
     user-select: none;
 }
 
+.slider {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 35dvw;
+    height: calc(var(--doc-height) - 3rem);
+    z-index: 9998;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: var(--white-color);
+    border: solid 1px var(--main-color);
+    border-radius: 1rem;
+    box-shadow: 0 0 24px 8px rgb(216 26 125 / 30%);
+    transform: translateX(calc(100% + 40px));
+    visibility: hidden;
+    transition: transform .4s ease-in-out, visibility 0s linear .4s;
+    z-index: 9999;
+    scrollbar-width: 0px;
+}
+
+.slider::-webkit-scrollbar {
+    width: 0px;
+    display: none;
+}
+
+.slider.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform .4s ease-in-out, visibility 0s;
+}
+
+.slider-button {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: 2rem 2rem;
+}
+
+.slider-close {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--main-color);
+    cursor: pointer;
+}
+
+.slider-close svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    stroke-width: 1px;
+    stroke-linecap: round;
+    transition: all .25s ease-in-out;
+}
+
+.slider-close:hover svg {
+    stroke-width: 2px;
+    /* filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.5)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.7)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.8)); */
+}
+
+.slider-content {
+    font-size: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+scrollbar {
+    width: 0.5rem;
+    background-color: var(--main-color);
+    border-radius: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .slider,
+    .slider.is-open {
+        transition: none;
+    }
+}
+
 @media screen and (max-width: 720px) {
 
     body {
         font-size: 0.75rem;
+    }
+
+    .slider {
+        width: calc(100svw - 3rem);
+        padding: 4rem 1rem 1rem;
     }
 
     h1,

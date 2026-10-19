@@ -23,5 +23,5 @@
         </div>
     <?php endforeach ?>
 </section>
-
+<?= snippet('info') ?>
 <?= snippet('foot') ?>

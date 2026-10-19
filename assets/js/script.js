@@ -158,6 +158,7 @@ const dashboardControls = () => {
 
     // --- Zoom (wheel), anchored to the cursor ---------------------------
     window.addEventListener("wheel", (e) => {
+        if (e.target.closest(".slider")) return; // let the info panel scroll normally
         e.preventDefault(); // drive the zoom instead of scrolling the page
 
         // Capture the point under the cursor in layout-local coords. originX/Y is
@@ -315,6 +316,36 @@ const logoStamp = () => {
     });
 };
 
+// Info link toggles the side panel; Escape or a click outside closes it.
+const infoSlider = () => {
+    const slider = document.querySelector(".slider");
+    const toggle = document.querySelector(".info-toggle");
+    if (!slider || !toggle) return;
+
+    const setOpen = (open) => {
+        slider.classList.toggle("is-open", open);
+        slider.setAttribute("aria-hidden", String(!open));
+        toggle.setAttribute("aria-expanded", String(open));
+    };
+
+    toggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        setOpen(!slider.classList.contains("is-open"));
+    });
+
+    slider.querySelector(".slider-close")?.addEventListener("click", () => setOpen(false));
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!slider.classList.contains("is-open")) return;
+        if (slider.contains(e.target) || toggle.contains(e.target)) return;
+        setOpen(false);
+    });
+};
+
 const positionDragElements = () => {
     const container = document.querySelector(".drag-layout");
     if (!container) return;
@@ -367,6 +398,7 @@ window.addEventListener("load", () => {
     dragElements();
     dashboardControls();
     logoStamp();
+    infoSlider();
 });
 
 window.addEventListener("resize", () => {

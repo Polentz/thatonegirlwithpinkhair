@@ -6,5 +6,17 @@ sections:
     fields:
       logo:
         type: files
+      infoText:
+        label: Info Text
+        type: writer
+        marks:
+          - bold
+          - italic
+          - underline
+          - strike
+          - link
+          - clear
+        nodes: false
   pages:
     type: pages
+
