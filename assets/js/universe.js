@@ -1,7 +1,8 @@
 // 3D prototype: the home page clusters float in space as groups of image
 // cards. Drag empty space to orbit, wheel/pinch to zoom, right-drag to pan.
 // Clicking a card stamps its cluster's text at that spot, linked to the
-// previous stamp by a pink line. Cards don't move: dragging on one orbits too.
+// previous stamp by a pink line, and brings that card up close; it floats back
+// on the next click, or Escape. Dragging on a card orbits, like empty space.
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -14,6 +15,8 @@ const CLUSTER_RADIUS = 5;     // cards stay within this distance of their cluste
 const CLUSTER_SPACING = 2 * CLUSTER_RADIUS + 2.5; // min distance between cluster centres 
 const UNIVERSE_RADIUS = 16;     // clusters are scattered inside this sphere 16
 const STAMP_SCALE = 0.01;       // CSS px → world units for the stamped text 0.01
+const CLOSE_UP_DISTANCE = 6;    // how far in front of the camera a clicked card floats
+const CLOSE_UP_SIZE = 0.6;      // share of the screen the close-up card fills
 const DRAG_SLOP = 5;            // px of movement that counts as a drag, not a click 5
 
 const container = document.querySelector(".universe");
@@ -114,10 +117,11 @@ data.forEach((clusterData, i) => {
 
         const holder = new THREE.Group();
         holder.position.copy(offsets[j]);
+        holder.userData = { home: offsets[j].clone(), width, height };
         holder.add(glow, card);
         group.add(holder);
 
-        card.userData = { cluster };
+        card.userData = { cluster, holder };
         cards.push(card);
         holders.push(holder);
     });
@@ -184,13 +188,66 @@ const release = (e) => {
     if (!isClick) return;
 
     const hit = pickCard(e);
-    if (!hit) return;
-    const { cluster } = hit.object.userData;
+    if (!hit) return closeUp(null); // empty space sends the close-up card back
+
+    const { cluster, holder } = hit.object.userData;
+    if (holder === closeUpHolder) return closeUp(null); // clicking it again sends it back
+
     if (cluster.text) stamp(cluster.text, hit.point);
     focusTarget = cluster.group.position.clone(); // turn the view towards it
+    closeUp(holder);
 };
 renderer.domElement.addEventListener("pointerup", release);
 renderer.domElement.addEventListener("pointercancel", release);
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeUp(null);
+});
+
+// --- Close-up: the clicked card floats in front of the camera -------------------
+
+let closeUpHolder = null;
+const moving = new Set(); // cards on their way to or from the close-up spot
+
+const closeUp = (holder) => {
+    if (closeUpHolder) moving.add(closeUpHolder); // the previous one heads home
+    closeUpHolder = holder;
+    if (holder) moving.add(holder);
+};
+
+const closeUpSpot = new THREE.Vector3();
+const homeScale = new THREE.Vector3(1, 1, 1);
+const targetScale = new THREE.Vector3();
+
+// Eases each moving card towards the close-up spot (recomputed every frame,
+// so it follows the camera) or back to its place in its cluster.
+const updateCloseUp = () => {
+    const ease = reduceMotion ? 1 : 0.12;
+
+    moving.forEach((holder) => {
+        const { home, width, height } = holder.userData;
+
+        if (holder === closeUpHolder) {
+            camera.getWorldDirection(closeUpSpot).multiplyScalar(CLOSE_UP_DISTANCE).add(camera.position);
+            holder.parent.worldToLocal(closeUpSpot);
+
+            const viewHeight = 2 * CLOSE_UP_DISTANCE * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+            const viewWidth = viewHeight * camera.aspect;
+            const scale = CLOSE_UP_SIZE * Math.min(viewHeight / height, viewWidth / width);
+
+            holder.position.lerp(closeUpSpot, ease);
+            holder.scale.lerp(targetScale.setScalar(scale), ease);
+        } else {
+            holder.position.lerp(home, ease);
+            holder.scale.lerp(homeScale, ease);
+            if (holder.position.distanceTo(home) < 0.001) {
+                holder.position.copy(home);
+                holder.scale.copy(homeScale);
+                moving.delete(holder);
+            }
+        }
+    });
+};
 
 // --- Camera controls -----------------------------------------------------------
 
@@ -199,11 +256,12 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 4;
 controls.maxDistance = 60;
-controls.autoRotate = !reduceMotion; // slow drift until the visitor takes over
+// Slow, constant drift. OrbitControls pauses it while the visitor is dragging
+// and picks it up again on release.
+controls.autoRotate = !reduceMotion;
 controls.autoRotateSpeed = 0.4;
 
 controls.addEventListener("start", () => {
-    controls.autoRotate = false;
     focusTarget = null; // the visitor's own move wins
     container.classList.add("is-grabbing");
 });
@@ -217,6 +275,7 @@ renderer.setAnimationLoop(() => {
         if (controls.target.distanceTo(focusTarget) < 0.01) focusTarget = null;
     }
     controls.update();
+    updateCloseUp();
 
     // Cards and stamps always face the viewer.
     holders.forEach((holder) => holder.quaternion.copy(camera.quaternion));
