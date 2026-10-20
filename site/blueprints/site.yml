@@ -29,6 +29,18 @@ sections:
           - email
           - clear
         nodes: false
+      howToText:
+        label: How to Text
+        type: writer
+        marks:
+          - bold
+          - italic
+          - underline
+          - strike
+          - link
+          - email
+          - clear
+        nodes: false
   pages:
     type: pages
 

@@ -31,7 +31,7 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
 </ul>
 
 <footer class="footer">
-    <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider" aria-expanded="false">?</a>
+    <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
     <a class="nav-label" href="<?= url() ?>">2D</a>
 </footer>
 
@@ -50,4 +50,5 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
 
 <?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
 <?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
+<?= snippet('slider', ['id' => 'how-to-slider', 'label' => 'how-to', 'text' => $site->howToText()]) ?>
 <?= snippet('foot') ?>
