@@ -30,38 +30,6 @@
     pointer-events: none;
 }
 
-/* Caption under the close-up image; script sets left/top to the image's
-   bottom-centre. */
-.closeup-caption {
-    position: absolute;
-    max-width: 80vw;
-    transform: translate(-50%, 1rem);
-    text-align: center;
-    font-size: 1.25rem;
-    color: var(--main-color);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .3s ease-in-out;
-}
-
-.closeup-caption.is-visible {
-    opacity: 1;
-}
-
-.closeup-caption p {
-    text-shadow:
-        0 0 5px rgba(216, 26, 125, 0.2),
-        0 0 10px rgb(216, 26, 125, 0.5),
-        0 0 20px rgb(216, 26, 125, 0.7),
-        0 0 40px rgba(216, 26, 124, 0.8);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .closeup-caption {
-        transition: none;
-    }
-}
-
 /* Readable by screen readers and search engines, hidden on screen. */
 .universe-fallback {
     position: absolute;

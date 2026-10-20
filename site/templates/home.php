@@ -10,9 +10,7 @@
             continue ?>
             <div class="cluster">
             <?php if ($cluster->text()->isNotEmpty()): ?>
-                <div class="cluster-text" hidden>
-                    <p><?= $cluster->text() ?></p>
-                </div>
+                <p class="cluster-text"><?= $cluster->text() ?></p>
             <?php endif ?>
             <?php foreach ($cluster->images()->toFiles() as $file): ?>
                 <div class="drag-element">
@@ -26,6 +24,7 @@
 </section>
 
 <footer class="footer">
+    <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
     <a class="nav-label" href="<?= url('universe') ?>">3D</a>
 </footer>
 

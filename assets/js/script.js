@@ -148,9 +148,13 @@ const dashboardControls = () => {
     // Bounds: the layout is viewport-sized and scales about its centre, so each
     // axis has slack of size·(s-1)/2 in either direction; at <=1x there is none,
     // so it locks to centre. Clamps panX/panY in place, then writes them out.
+    // During a close-up the bounds grow by half the layout, so an image right
+    // at the edge can still sit in the middle of the screen.
     const clampAndRender = (s) => {
-        const maxX = Math.max(0, (layout.offsetWidth * (s - 1)) / 2);
-        const maxY = Math.max(0, (layout.offsetHeight * (s - 1)) / 2);
+        const extraX = focused ? layout.offsetWidth / 2 : 0;
+        const extraY = focused ? layout.offsetHeight / 2 : 0;
+        const maxX = Math.max(0, (layout.offsetWidth * (s - 1)) / 2 + extraX);
+        const maxY = Math.max(0, (layout.offsetHeight * (s - 1)) / 2 + extraY);
         panX = Math.min(maxX, Math.max(-maxX, panX));
         panY = Math.min(maxY, Math.max(-maxY, panY));
         gsap.set(layout, { x: panX, y: panY });
@@ -183,12 +187,123 @@ const dashboardControls = () => {
     // quickTo uses resetTo, which can't reset a shorthand that splits in two.
     const toScaleX = gsap.quickTo(layout, "scaleX", { duration: 0.4, ease: "power3.out", onUpdate: () => panUpdater() });
     const toScaleY = gsap.quickTo(layout, "scaleY", { duration: 0.4, ease: "power3.out" });
-    const applyScale = () => { toScaleX(scale); toScaleY(scale); };
+    const applyScale = () => {
+        // Start from the live scale: a close-up animation may have changed it.
+        const live = gsap.getProperty(layout, "scaleX") || 1;
+        toScaleX(scale, live);
+        toScaleY(scale, live);
+    };
+
+    // --- Close-up: zoom in on one image ---------------------------------
+    // Eases the view until the image sits centred and fills CLOSE_UP_SIZE of
+    // the screen, like moving closer to it, with its cluster's text as a
+    // caption. The view from before is restored when the close-up ends.
+    const CLOSE_UP_SIZE = 0.5;
+    const CLOSE_UP_DURATION = 0.9;
+
+    const caption = document.createElement("div");
+    caption.className = "closeup-caption";
+    document.body.appendChild(caption);
+
+    let focused = null;   // the .drag-element in close-up
+    let savedView = null; // { s, x, y } to return to
+    let animating = false;
+    const view = { s: 1, x: 0, y: 0 }; // tweened, then written to the layout
+
+    const animateView = (s, x, y) => {
+        gsap.killTweensOf(layout); // stop any wheel-zoom easing
+        gsap.killTweensOf(view);
+        view.s = gsap.getProperty(layout, "scaleX") || 1;
+        view.x = panX;
+        view.y = panY;
+        scale = s;
+        animating = true;
+        // Blurred glows are what make each zoom frame expensive (their blur
+        // grows with the zoom), so drop them while moving and bring them back
+        // once the view settles.
+        layout.classList.add("is-zooming");
+        gsap.to(view, {
+            s, x, y,
+            duration: CLOSE_UP_DURATION,
+            ease: "power3.inOut",
+            onUpdate: () => {
+                panX = view.x;
+                panY = view.y;
+                gsap.set(layout, { scaleX: view.s, scaleY: view.s, x: view.x, y: view.y });
+            },
+            onComplete: () => {
+                animating = false;
+                layout.classList.remove("is-zooming");
+                updateCursor();
+            },
+        });
+    };
+
+    window.focusImage = (element, html) => {
+        if (!focused) {
+            savedView = { s: gsap.getProperty(layout, "scaleX") || 1, x: panX, y: panY };
+        } else {
+            focused.style.zIndex = "";
+        }
+        focused = element;
+        element.style.zIndex = 2000; // above its neighbours and the cluster text
+
+        // Pan that puts the image's centre in the middle of the screen at
+        // scale s: the layout's centre sits at origin + pan, and a point d
+        // (unscaled) from it lands at origin + pan + d·s.
+        const rect = layout.getBoundingClientRect();
+        const liveS = gsap.getProperty(layout, "scaleX") || 1;
+        const originX = rect.left + rect.width / 2 - gsap.getProperty(layout, "x");
+        const originY = rect.top + rect.height / 2 - gsap.getProperty(layout, "y");
+        const r = element.getBoundingClientRect();
+        const dx = (r.left + r.width / 2 - (rect.left + rect.width / 2)) / liveS;
+        const dy = (r.top + r.height / 2 - (rect.top + rect.height / 2)) / liveS;
+
+        const width = element.offsetWidth;
+        const height = element.offsetHeight;
+        const s = CLOSE_UP_SIZE * Math.min(window.innerHeight / height, window.innerWidth / width);
+        animateView(s, window.innerWidth / 2 - originX - dx * s, window.innerHeight / 2 - originY - dy * s);
+
+        // Caption under where the image will end up; fades in as it arrives.
+        caption.innerHTML = html ? `<p>${html}</p>` : "";
+        caption.style.left = `${window.innerWidth / 2}px`;
+        caption.style.top = `${window.innerHeight / 2 + (height * s) / 2}px`;
+        caption.style.transitionDelay = `${CLOSE_UP_DURATION * 0.6}s`;
+        caption.classList.toggle("is-visible", !!html);
+    };
+
+    const unfocus = () => {
+        if (!focused) return;
+        focused.style.zIndex = "";
+        focused = null;
+        caption.style.transitionDelay = "0s";
+        caption.classList.remove("is-visible");
+        animateView(savedView.s, savedView.x, savedView.y);
+        savedView = null;
+    };
+
+    // Keeps the caption under the close-up image while it's panned around.
+    const placeCaption = () => {
+        const r = focused.getBoundingClientRect();
+        caption.style.left = `${r.left + r.width / 2}px`;
+        caption.style.top = `${r.bottom}px`;
+    };
+
+    window.unfocusImage = unfocus;
+    window.focusedImage = () => focused;
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") unfocus();
+    });
 
     // --- Zoom (wheel), anchored to the cursor ---------------------------
     window.addEventListener("wheel", (e) => {
         if (e.target.closest(".slider")) return; // let the info panel scroll normally
         e.preventDefault(); // drive the zoom instead of scrolling the page
+
+        // Zooming during a close-up ends it; wait until the view settles.
+        if (focused) unfocus();
+        if (animating) return;
 
         // Capture the point under the cursor in layout-local coords. originX/Y is
         // the untransformed centre, backed out of the live transform (so it holds
@@ -224,14 +339,18 @@ const dashboardControls = () => {
         if (activeId === null) layout.style.cursor = scale > 1 ? "grab" : "";
     };
 
+    let captured = false; // pointer captured once the press has turned into a drag
+
     layout.addEventListener("pointerdown", (e) => {
-        // Only pan from empty space — let cards run their own drag handlers.
-        if (e.target.closest(".drag-element")) return;
+        if (animating) return;
+        // Pan from empty space only, except in a close-up, where the image
+        // fills most of the screen and dragging it pans too.
+        if (!focused && e.target.closest(".drag-element")) return;
         if (scale <= 1) return; // nothing to pan until zoomed in
         if (activeId !== null) return; // already panning with another pointer
 
         activeId = e.pointerId;
-        layout.setPointerCapture(activeId); // keep moves even if the pointer leaves
+        captured = false;
 
         startX = e.clientX;
         startY = e.clientY;
@@ -240,22 +359,31 @@ const dashboardControls = () => {
 
         panUpdater = renderPan; // a lingering zoom tween shouldn't fight the drag
         layout.style.cursor = "grabbing";
-        // Promote the layout to its own GPU layer while panning, so moving it
-        // doesn't repaint every image and glow on each frame. Only during the
-        // pan: left on, zoom would scale a stale bitmap and look blurry.
-        layout.style.willChange = "transform";
     });
 
     layout.addEventListener("pointermove", (e) => {
         if (e.pointerId !== activeId) return;
+        // Capture only once it's really a drag, so a plain click still lands
+        // on the image under the pointer (to switch or end the close-up).
+        if (!captured) {
+            if (Math.hypot(e.clientX - startX, e.clientY - startY) <= 5) return;
+            layout.setPointerCapture(activeId); // keep moves even if the pointer leaves
+            captured = true;
+            // Promote the layout to its own GPU layer while panning, so moving
+            // it doesn't repaint every image and glow on each frame. Only
+            // during the pan: left on, zoom would scale a stale bitmap and
+            // look blurry.
+            layout.style.willChange = "transform";
+        }
         panX = startPanX + (e.clientX - startX);
         panY = startPanY + (e.clientY - startY);
         renderPan(); // instant 1:1 tracking, kept within bounds
+        if (focused) placeCaption();
     });
 
     const endPan = (e) => {
         if (e.pointerId !== activeId) return;
-        layout.releasePointerCapture(activeId);
+        if (captured) layout.releasePointerCapture(activeId);
         activeId = null;
         layout.style.willChange = "";
         updateCursor(); // back to grab if still zoomed in, else default
@@ -387,58 +515,139 @@ const sliders = () => {
     });
 };
 
-// Clicking a cluster (not dragging inside it) stamps that cluster's text at
-// the click point. Every click adds another copy.
-const clusterStamps = () => {
+// Clicking an image (not dragging) marks the trail (a dot first, then a line
+// from the previous click) and zooms in on it, captioned with its cluster's
+// text. Clicking it again or clicking empty space zooms back out.
+const imageClicks = () => {
     const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click
 
-    document.querySelectorAll(".cluster").forEach((cluster) => {
-        const text = cluster.querySelector(".cluster-text")?.innerHTML.trim();
-        if (!text) return;
+    document.querySelectorAll(".drag-element").forEach((element) => {
+        const wrapper = element.querySelector(".drag-element-wrapper") || element;
+        const text = element.closest(".cluster")?.querySelector(".cluster-text")?.innerHTML.trim() || "";
 
         let downX = 0, downY = 0;
-        cluster.addEventListener("pointerdown", (e) => {
+        wrapper.addEventListener("pointerdown", (e) => {
             downX = e.clientX;
             downY = e.clientY;
         });
 
-        cluster.addEventListener("click", (e) => {
+        wrapper.addEventListener("click", (e) => {
             if (document.body.classList.contains("stamp-mode")) return; // logo stamping instead
             if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged
-            window.stampText?.(text, e.clientX, e.clientY);
+            if (window.focusedImage?.() === element) return window.unfocusImage();
+            window.stampPoint?.(e.clientX, e.clientY);
+            window.focusImage?.(element, text);
         });
+    });
+
+    // Clicking empty space ends the close-up; the click that ends a pan doesn't.
+    let pressX = 0, pressY = 0;
+    document.addEventListener("pointerdown", (e) => {
+        pressX = e.clientX;
+        pressY = e.clientY;
+    }, true);
+
+    document.addEventListener("click", (e) => {
+        if (e.target.closest(".drag-element-wrapper, .slider, .header, .footer")) return;
+        if (Math.hypot(e.clientX - pressX, e.clientY - pressY) > DRAG_SLOP) return;
+        window.unfocusImage?.();
     });
 };
 
-// Scatters clusters across the layout without overlap, then scatters each
-// cluster's images inside it.
-const IMAGE_GAP = 16;   // min px between images inside a cluster
+const IMAGE_GAP = 8;    // px between neighbours inside a cluster: close, so they read as a group
 const CLUSTER_GAP = 40; // min px between clusters
-const CLUSTER_ROOM = 1.5; // cell size vs. largest image: >1 leaves room to scatter and drag
+const MAX_ATTEMPTS = 8;
 
-// Sizes each cluster to fit its images, scatters the images inside it, then
-// scatters the clusters across the layout. Nothing overlaps.
+// Packs each cluster tightly around its text, then scatters the clusters
+// across the layout. If they don't all fit side by side, it tries again with
+// smaller images (via --card-scale) until nothing overlaps.
 const positionDragElements = () => {
     const layout = document.querySelector(".drag-layout");
     if (!layout) return;
 
     const clusters = Array.from(layout.querySelectorAll(".cluster"));
+    let cardScale = 1;
 
-    clusters.forEach((cluster) => {
-        const images = Array.from(cluster.querySelectorAll(".drag-element"));
-        const maxW = Math.max(...images.map((el) => el.offsetWidth));
-        const maxH = Math.max(...images.map((el) => el.offsetHeight));
-        const cols = Math.ceil(Math.sqrt(images.length));
-        const rows = Math.ceil(images.length / cols);
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        layout.style.setProperty("--card-scale", cardScale);
+        clusters.forEach(packCluster);
+        scatter(layout, clusters, CLUSTER_GAP);
+        if (!clustersCollide(layout, clusters)) break;
+        cardScale *= 0.9;
+    }
 
-        cluster.style.width = `${cols * (maxW * CLUSTER_ROOM + IMAGE_GAP)}px`;
-        cluster.style.height = `${rows * (maxH * CLUSTER_ROOM + IMAGE_GAP)}px`;
-        scatter(cluster, images, IMAGE_GAP);
+    gsap.to(".drag-element, .cluster-text", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
+};
+
+// Text in the middle; each image (in random order) takes the closest free
+// spot, searched along a spiral from the centre in a random direction, so
+// the cluster forms a tight, irregular bunch. The cluster is then sized to
+// its contents.
+const packCluster = (cluster) => {
+    const boxes = new Map(); // element -> box around (0, 0)
+    const fits = (box) => Array.from(boxes.values()).every((other) =>
+        box.left >= other.left + other.width + IMAGE_GAP ||
+        box.left + box.width + IMAGE_GAP <= other.left ||
+        box.top >= other.top + other.height + IMAGE_GAP ||
+        box.top + box.height + IMAGE_GAP <= other.top
+    );
+    const boxAt = (el, x, y) => ({
+        left: x - el.offsetWidth / 2, top: y - el.offsetHeight / 2,
+        width: el.offsetWidth, height: el.offsetHeight,
     });
 
-    scatter(layout, clusters, CLUSTER_GAP);
+    const text = cluster.querySelector(".cluster-text");
+    if (text) boxes.set(text, boxAt(text, 0, 0));
 
-    gsap.to(".drag-element", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
+    const images = Array.from(cluster.querySelectorAll(".drag-element"));
+    for (let i = images.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [images[i], images[j]] = [images[j], images[i]];
+    }
+
+    images.forEach((image) => {
+        const startAngle = Math.random() * Math.PI * 2;
+        for (let radius = 0; ; radius += 4) {
+            const steps = Math.max(8, Math.ceil((2 * Math.PI * radius) / 6)); // a try every ~6px
+            for (let k = 0; k < steps; k++) {
+                const angle = startAngle + (k / steps) * Math.PI * 2;
+                const box = boxAt(image, radius * Math.cos(angle), radius * Math.sin(angle));
+                if (fits(box)) return boxes.set(image, box);
+            }
+        }
+    });
+
+    // Shift everything so the cluster's top-left is (0, 0) and size it to fit.
+    const all = Array.from(boxes.values());
+    const minLeft = Math.min(...all.map((b) => b.left));
+    const minTop = Math.min(...all.map((b) => b.top));
+    const maxRight = Math.max(...all.map((b) => b.left + b.width));
+    const maxBottom = Math.max(...all.map((b) => b.top + b.height));
+
+    boxes.forEach((box, el) => {
+        el.style.right = "auto";
+        el.style.bottom = "auto";
+        el.style.left = `${box.left - minLeft}px`;
+        el.style.top = `${box.top - minTop}px`;
+    });
+    cluster.style.width = `${maxRight - minLeft}px`;
+    cluster.style.height = `${maxBottom - minTop}px`;
+};
+
+// True if any two clusters overlap or one sticks out of the layout. Items
+// inside a cluster can't overlap: packCluster only uses free spots.
+const clustersCollide = (layout, clusters) => {
+    const boxes = clusters.map((c) => ({
+        left: c.offsetLeft, top: c.offsetTop,
+        right: c.offsetLeft + c.offsetWidth, bottom: c.offsetTop + c.offsetHeight,
+    }));
+    const outside = boxes.some((b) =>
+        b.left < 0 || b.top < 0 || b.right > layout.clientWidth || b.bottom > layout.clientHeight
+    );
+    const overlap = boxes.some((a, i) => boxes.slice(i + 1).some((b) =>
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+    ));
+    return outside || overlap;
 };
 
 // Places `elements` at random inside `container` without overlap: the
@@ -499,7 +708,7 @@ window.addEventListener("load", () => {
     positionDragElements();
     // hoverInteraction();
     // dragElements();
-    clusterStamps();
+    imageClicks();
     dashboardControls();
     // logoStamp();
     sliders();

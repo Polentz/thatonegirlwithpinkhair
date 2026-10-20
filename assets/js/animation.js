@@ -1,7 +1,9 @@
-// The last stamp and the lines are kept in .drag-layout's own (unzoomed)
-// coordinates, like the stamped text, so they zoom and pan with the images.
-let startX;
-let startY;
+// The last click and the lines are kept in .drag-layout's own (unzoomed)
+// coordinates, so they zoom and pan with the images. The first click on an
+// image marks a dot; lines (and the guide to the pointer) start from there.
+let startX = null; // last click; null until the first one
+let startY = null;
+let startDot = null; // where the trail begins
 
 let paths = [];
 
@@ -18,10 +20,6 @@ const layoutTransform = () => {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    startX = windowWidth / 2;
-    startY = windowHeight / 2;
-
-    hasClusterText = !!document.querySelector(".cluster-text");
 };
 
 // While a drag-element is dragged it calls preventDefault on the pointer
@@ -50,7 +48,25 @@ function draw() {
 
     const t = layoutTransform();
 
-    if (hasClusterText && !document.body.classList.contains("stamp-mode")) {
+    if (startDot) {
+        // Glowing pink dot where the trail starts, drawn like the 3D one: a
+        // quarter of an image's width across, solid in the middle and fading out.
+        const cardWidth = document.querySelector(".drag-element-wrapper")?.offsetWidth || 40;
+        const radius = (cardWidth * 0.25 * t.s) / 2;
+        const x = t.x + startDot.x * t.s;
+        const y = t.y + startDot.y * t.s;
+        const gradient = drawingContext.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, "rgba(216, 26, 125, 1)");
+        gradient.addColorStop(0.15, "rgba(216, 26, 125, 1)");
+        gradient.addColorStop(0.3, "rgba(216, 26, 125, 0.5)");
+        gradient.addColorStop(1, "rgba(216, 26, 125, 0)");
+        drawingContext.fillStyle = gradient;
+        drawingContext.beginPath();
+        drawingContext.arc(x, y, radius, 0, Math.PI * 2);
+        drawingContext.fill();
+    };
+
+    if (startX !== null && !document.body.classList.contains("stamp-mode")) {
         // The guide runs from the last stamp (layout coords) to the pointer
         // (canvas coords), so convert the pointer back into layout coords.
         const aim = guidePointer || { x: mouseX, y: mouseY };
@@ -65,13 +81,12 @@ function draw() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    startX = windowWidth / 2;
-    startY = windowHeight / 2;
 };
 
 function resetMap() {
     paths = [];
-    document.querySelectorAll(".block").forEach((block) => block.remove());
+    startDot = null;
+    startX = startY = null;
 };
 
 // function mouseMoved() {
@@ -86,20 +101,22 @@ function resetMap() {
 //     startY = newEndY;
 // };
 
-// Called by a cluster click (script.js) with the cluster's text HTML and the
-// click position: draws the line from the last stamp and places the text.
-window.stampText = (html, clientX, clientY) => {
+// Called by an image click (script.js) with the click position: the first
+// click marks the start dot, later ones draw a line from the previous click.
+window.stampPoint = (clientX, clientY) => {
     const layout = document.querySelector(".drag-layout");
     const rect = layout.getBoundingClientRect();
     const s = rect.width / layout.offsetWidth;
     const x = (clientX - rect.left) / s;
     const y = (clientY - rect.top) / s;
 
-    paths.push(new Path(startX, startY, x, y));
+    if (startX === null) {
+        startDot = { x, y };
+    } else {
+        paths.push(new Path(startX, startY, x, y));
+    }
     startX = x;
     startY = y;
-
-    placeItem(html, x, y);
 };
 
 class Path {
@@ -122,17 +139,3 @@ class Path {
     }
 };
 
-
-let hasClusterText = false;
-
-function placeItem(html, x, y) {
-    let DOM_DIV = document.createElement('div');
-    DOM_DIV.innerHTML = html;
-
-    DOM_DIV.style.top = y + 'px';
-    DOM_DIV.style.left = x + 'px';
-
-    DOM_DIV.setAttribute("class", "block");
-
-    document.querySelector(".drag-layout").append(DOM_DIV);
-};
