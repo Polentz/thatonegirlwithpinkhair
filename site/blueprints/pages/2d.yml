@@ -1,13 +1,40 @@
 title: 2D prototype
 
+options: 
+  changeSlug: true
+  changeStatus: true
+  changeTemplate: false
+  cheangeTitle: true
+  create: false
+  delete: false
+  duplicate: false
+  list: true
+  move: false
+  preview: true
+  sort: false
+  update: true
+
+
 sections:
   content:
     type: fields
     fields:
+      howToText:
+        label: How to Text
+        type: writer
+        marks:
+          - bold
+          - italic
+          - underline
+          - strike
+          - link
+          - email
+          - clear
+        nodes: false
       clusters:
         label: Clusters
         type: structure
-        help: Each cluster is a group of images. Clicking the cluster stamps its text.
+        help: Each cluster is a group of images with its text.
         columns:
           images:
             width: 2/3

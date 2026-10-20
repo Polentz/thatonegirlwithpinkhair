@@ -1,6 +1,35 @@
 title: 3D prototype
 
+options: 
+  changeSlug: false
+  changeStatus: true
+  changeTemplate: false
+  cheangeTitle: true
+  create: false
+  delete: false
+  duplicate: false
+  list: true
+  move: false
+  preview: true
+  sort: false
+  update: true
+
 sections:
+  content:
+    type: fields
+    fields:
+      howToText:
+        label: How to Text
+        type: writer
+        marks:
+          - bold
+          - italic
+          - underline
+          - strike
+          - link
+          - email
+          - clear
+        nodes: false
   info:
     type: info
     text: This page shows the clusters from the 2D page in 3D. Edit the clusters on 2D.

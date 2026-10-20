@@ -279,7 +279,8 @@ body.stamp-mode .stamp-cursor.over-nav {
     right: 1rem;
     max-width: 35dvw;
     max-height: calc(var(--doc-height) - 2rem);
-    z-index: 9998;
+    display: flex;
+    flex-direction: row-reverse;
     box-sizing: border-box;
     overflow-y: auto;
     background: var(--white-color);
@@ -289,7 +290,7 @@ body.stamp-mode .stamp-cursor.over-nav {
     transform: translateX(calc(100% + 40px));
     visibility: hidden;
     transition: transform .4s ease-in-out, visibility 0s linear .4s;
-    z-index: 9999;
+    z-index: 9998;
     scrollbar-width: 0px;
 }
 

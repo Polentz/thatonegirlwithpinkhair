@@ -2,4 +2,8 @@ Title: 3D
 
 ----
 
+Howtotext: <p><strong>How to navigate the page</strong><br>Drag to turn the universe, scroll to fly closer. Click an image to bring it near; drag, scroll or press Esc to send it back. Your clicks connect into a pink trail.</p>
+
+----
+
 Uuid: 4jvlfzzkmwjglshn
