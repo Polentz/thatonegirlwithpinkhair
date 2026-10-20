@@ -1,9 +1,14 @@
-const documentHeight = () => {
-    const doc = document.documentElement;
-    doc.style.setProperty("--doc-height", `${window.innerHeight}px`);
+/* ---------- CURRENTLY NOT IN USE! ---------- */
+
+// CURRENTLY NOT IN USE!
+const dragElements = () => {
+    document.querySelectorAll(".draggable").forEach((handle) => {
+        const target = handle.closest(".drag-element") || handle;
+        makeDraggable(handle, target);
+    });
 };
 
-
+// CURRENTLY NOT IN USE!
 // Makes `target` follow the pointer while `handle` is dragged.
 // Delta-based, so it works regardless of any transform on the target.
 // The target is kept inside its offset parent (its .cluster) and stops when it
@@ -62,6 +67,7 @@ const makeDraggable = (handle, target) => {
     handle.addEventListener("pointercancel", endDrag);
 };
 
+// CURRENTLY NOT IN USE!
 // True if `target` placed at (left, top) would overlap another image in the
 // same cluster.
 const hitsSibling = (target, left, top) => {
@@ -77,13 +83,7 @@ const hitsSibling = (target, left, top) => {
     );
 };
 
-const dragElements = () => {
-    document.querySelectorAll(".draggable").forEach((handle) => {
-        const target = handle.closest(".drag-element") || handle;
-        makeDraggable(handle, target);
-    });
-};
-
+// CURRENTLY NOT IN USE!
 // Playful "pop & wobble" when the pointer hovers a card: it jumps forward,
 // scales up and does a quick springy tilt before settling.
 const hoverInteraction = () => {
@@ -122,6 +122,89 @@ const hoverInteraction = () => {
             });
         });
     });
+};
+
+// CURRENTLY NOT IN USE!
+// Click the logo to toggle "stamp mode": the logo image trails the pointer (over
+// a normal crosshair cursor) and clicking a drag-element stamps the logo on top
+// of it (once per element).
+const logoStamp = () => {
+    const logo = document.querySelector(".logo");
+    if (!logo) return;
+    const logoSrc = logo.querySelector("img")?.getAttribute("src");
+
+    let stampMode = false;
+
+    const preview = document.createElement("img");
+    preview.src = logoSrc;
+    preview.className = "stamp-cursor";
+    document.body.appendChild(preview);
+
+    const movePreview = (e) => {
+        preview.style.left = `${e.clientX}px`;
+        preview.style.top = `${e.clientY}px`;
+    };
+
+    // Hide the trailing logo over the nav so it doesn't cover the links.
+    const nav = document.querySelector(".nav");
+    if (nav) {
+        nav.addEventListener("pointerenter", () => preview.classList.add("over-nav"));
+        nav.addEventListener("pointerleave", () => preview.classList.remove("over-nav"));
+    }
+
+    logo.addEventListener("click", (e) => {
+        e.stopPropagation();
+        stampMode = !stampMode;
+        document.body.classList.toggle("stamp-mode", stampMode);
+        if (stampMode) {
+            window.addEventListener("pointermove", movePreview);
+        } else {
+            window.removeEventListener("pointermove", movePreview);
+        }
+    });
+
+    const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click
+
+    document.querySelectorAll(".drag-element").forEach((element) => {
+        // Listen on the wrapper: .drag-element has pointer-events:none, the
+        // wrapper is the visible, clickable box, and stamping into it makes the
+        // stamp travel with the card when it's dragged.
+        const wrapper = element.querySelector(".drag-element-wrapper") || element;
+
+        // Remember where the press started so a click that followed a drag can
+        // be told apart from a clean click-in-place.
+        let downX = 0, downY = 0;
+        wrapper.addEventListener("pointerdown", (e) => {
+            downX = e.clientX;
+            downY = e.clientY;
+        });
+
+        wrapper.addEventListener("click", (e) => {
+            if (!stampMode) return;
+            if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged, not stamped
+            if (wrapper.querySelector(".logo-stamp")) return; // one stamp per card
+
+            const rect = wrapper.getBoundingClientRect();
+            const stamp = document.createElement("img");
+            stamp.src = logoSrc;
+            stamp.className = "logo-stamp";
+            stamp.style.left = `${((e.clientX - rect.left) / rect.width) * 100}%`;
+            stamp.style.top = `${((e.clientY - rect.top) / rect.height) * 100}%`;
+
+            wrapper.appendChild(stamp);
+        });
+    });
+};
+
+/* ---------- IN USE ---------- */
+
+const IMAGE_GAP = 8;    // px between neighbours inside a cluster: close, so they read as a group
+const CLUSTER_GAP = 40; // min px between clusters
+const MAX_ATTEMPTS = 8;
+
+const documentHeight = () => {
+    const doc = document.documentElement;
+    doc.style.setProperty("--doc-height", `${window.innerHeight}px`);
 };
 
 // Turns .drag-layout into a zoomable, pannable dashboard:
@@ -407,77 +490,6 @@ const dashboardControls = () => {
     // });
 };
 
-// Click the logo to toggle "stamp mode": the logo image trails the pointer (over
-// a normal crosshair cursor) and clicking a drag-element stamps the logo on top
-// of it (once per element).
-const logoStamp = () => {
-    const logo = document.querySelector(".logo");
-    if (!logo) return;
-    const logoSrc = logo.querySelector("img")?.getAttribute("src");
-
-    let stampMode = false;
-
-    const preview = document.createElement("img");
-    preview.src = logoSrc;
-    preview.className = "stamp-cursor";
-    document.body.appendChild(preview);
-
-    const movePreview = (e) => {
-        preview.style.left = `${e.clientX}px`;
-        preview.style.top = `${e.clientY}px`;
-    };
-
-    // Hide the trailing logo over the nav so it doesn't cover the links.
-    const nav = document.querySelector(".nav");
-    if (nav) {
-        nav.addEventListener("pointerenter", () => preview.classList.add("over-nav"));
-        nav.addEventListener("pointerleave", () => preview.classList.remove("over-nav"));
-    }
-
-    logo.addEventListener("click", (e) => {
-        e.stopPropagation();
-        stampMode = !stampMode;
-        document.body.classList.toggle("stamp-mode", stampMode);
-        if (stampMode) {
-            window.addEventListener("pointermove", movePreview);
-        } else {
-            window.removeEventListener("pointermove", movePreview);
-        }
-    });
-
-    const DRAG_SLOP = 5; // px of movement that counts as a drag, not a click
-
-    document.querySelectorAll(".drag-element").forEach((element) => {
-        // Listen on the wrapper: .drag-element has pointer-events:none, the
-        // wrapper is the visible, clickable box, and stamping into it makes the
-        // stamp travel with the card when it's dragged.
-        const wrapper = element.querySelector(".drag-element-wrapper") || element;
-
-        // Remember where the press started so a click that followed a drag can
-        // be told apart from a clean click-in-place.
-        let downX = 0, downY = 0;
-        wrapper.addEventListener("pointerdown", (e) => {
-            downX = e.clientX;
-            downY = e.clientY;
-        });
-
-        wrapper.addEventListener("click", (e) => {
-            if (!stampMode) return;
-            if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged, not stamped
-            if (wrapper.querySelector(".logo-stamp")) return; // one stamp per card
-
-            const rect = wrapper.getBoundingClientRect();
-            const stamp = document.createElement("img");
-            stamp.src = logoSrc;
-            stamp.className = "logo-stamp";
-            stamp.style.left = `${((e.clientX - rect.left) / rect.width) * 100}%`;
-            stamp.style.top = `${((e.clientY - rect.top) / rect.height) * 100}%`;
-
-            wrapper.appendChild(stamp);
-        });
-    });
-};
-
 // Info link toggles the side panel; Escape or a click outside closes it.
 // Each .slider-toggle opens the panel named by its aria-controls. Only one
 // panel is open at a time; the X, Escape or a click outside closes it.
@@ -554,10 +566,6 @@ const imageClicks = () => {
     });
 };
 
-const IMAGE_GAP = 8;    // px between neighbours inside a cluster: close, so they read as a group
-const CLUSTER_GAP = 40; // min px between clusters
-const MAX_ATTEMPTS = 8;
-
 // Packs each cluster tightly around its text, then scatters the clusters
 // across the layout. If they don't all fit side by side, it tries again with
 // smaller images (via --card-scale) until nothing overlaps.
@@ -574,7 +582,7 @@ const positionDragElements = () => {
         scatter(layout, clusters, CLUSTER_GAP);
         if (!clustersCollide(layout, clusters)) break;
         cardScale *= 0.9;
-    }
+    };
 
     gsap.to(".drag-element, .cluster-text", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
 };
@@ -603,7 +611,7 @@ const packCluster = (cluster) => {
     for (let i = images.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [images[i], images[j]] = [images[j], images[i]];
-    }
+    };
 
     images.forEach((image) => {
         const startAngle = Math.random() * Math.PI * 2;
@@ -613,8 +621,8 @@ const packCluster = (cluster) => {
                 const angle = startAngle + (k / steps) * Math.PI * 2;
                 const box = boxAt(image, radius * Math.cos(angle), radius * Math.sin(angle));
                 if (fits(box)) return boxes.set(image, box);
-            }
-        }
+            };
+        };
     });
 
     // Shift everything so the cluster's top-left is (0, 0) and size it to fit.
@@ -706,11 +714,8 @@ const scatter = (container, elements, gap) => {
 window.addEventListener("load", () => {
     documentHeight();
     positionDragElements();
-    // hoverInteraction();
-    // dragElements();
     imageClicks();
     dashboardControls();
-    // logoStamp();
     sliders();
 });
 

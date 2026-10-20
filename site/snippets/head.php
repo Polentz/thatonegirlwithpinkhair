@@ -15,11 +15,11 @@
     <meta property="og:description" content="<?= $site->description() ?>">
     <meta property="og:url" content="<?= $page->url() ?>">
     <meta property="og:site_name" content="<?= $site->title() ?>">
-    <?php if ($ogImage = $site->ogImage()->toFile()): ?>
+    <?php if ($ogImage = $site->logo()->toFile()): ?>
         <meta property="og:image" content="<?= $ogImage->url() ?>">
     <?php endif ?>
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <?php if ($favicon = $site->favicon()->toFile()): ?>
+    <?php if ($favicon = $site->logo()->toFile()): ?>
         <link href="<?= $favicon->url() ?>" rel="shortcut icon" type="image/x-icon">
         <link href="<?= $favicon->url() ?>" rel="apple-touch-icon">
     <?php endif ?>
@@ -30,17 +30,17 @@
         '@auto',
     ]) ?>
     <noscript>Please turn on JS to navigate this website</noscript>
-    <?php if ($page->intendedTemplate()->name() === 'universe'): ?>
+    <?php if ($page->intendedTemplate()->name() === 'home'): ?>
         <?php /* 3D prototype: no p5/2D layout, script.js only for the sliders */ ?>
         <?= js('assets/js/script.js') ?>
     <?php else: ?>
-            <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>
-            <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
-            <?= js([
-                'assets/js/script.js',
-                'assets/js/animation.js',
-                '@auto',
-            ]) ?>
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
+        <?= js([
+            'assets/js/script.js',
+            'assets/js/animation.js',
+            '@auto',
+        ]) ?>
     <?php endif ?>
 </head>
 

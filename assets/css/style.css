@@ -141,7 +141,6 @@ h1 {
    by script.js to fit its images. */
 .cluster {
     position: absolute;
-    /* background: red */
 }
 
 /* The cluster's text, scattered among its images like one of them. */
@@ -278,7 +277,7 @@ body.stamp-mode .stamp-cursor.over-nav {
     position: fixed;
     top: 1rem;
     right: 1rem;
-    width: 35dvw;
+    max-width: 35dvw;
     max-height: calc(var(--doc-height) - 2rem);
     z-index: 9998;
     box-sizing: border-box;
@@ -340,21 +339,13 @@ body.stamp-mode .stamp-cursor.over-nav {
 
 .slider-close:hover svg {
     stroke-width: 2px;
-    /* filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.5)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.7)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.8)); */
 }
 
 .slider-content {
-    /* font-size: 2rem; */
     display: flex;
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-}
-
-scrollbar {
-    width: 0.5rem;
-    background-color: var(--main-color);
-    border-radius: 0.25rem;
 }
 
 .footer {
