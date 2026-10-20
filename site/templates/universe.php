@@ -24,14 +24,16 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
 
 <section class="universe" aria-label="Clusters of images in 3D"></section>
 
-<?php /* Plain-HTML fallback for screen readers and search engines. */ ?>
 <ul class="universe-fallback">
     <?php foreach ($clusters as $cluster): ?>
         <li><?= $cluster['text'] ?></li>
     <?php endforeach ?>
 </ul>
 
-<!-- <a class="universe-back nav-label" href="<?= url() ?>">2D</a> -->
+<footer class="footer">
+    <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider" aria-expanded="false">?</a>
+    <a class="nav-label" href="<?= url() ?>">2D</a>
+</footer>
 
 <script type="importmap">
     {

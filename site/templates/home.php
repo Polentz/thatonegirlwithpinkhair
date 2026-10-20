@@ -6,8 +6,9 @@
 
 <section class="drag-layout">
     <?php foreach ($page->clusters()->toStructure() as $cluster): ?>
-        <?php if ($cluster->images()->toFiles()->isEmpty()) continue ?>
-        <div class="cluster">
+        <?php if ($cluster->images()->toFiles()->isEmpty())
+            continue ?>
+            <div class="cluster">
             <?php if ($cluster->text()->isNotEmpty()): ?>
                 <div class="cluster-text" hidden>
                     <p><?= $cluster->text() ?></p>
@@ -23,6 +24,11 @@
         </div>
     <?php endforeach ?>
 </section>
+
+<footer class="footer">
+    <a class="nav-label" href="<?= url('universe') ?>">3D</a>
+</footer>
+
 <?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
 <?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
 <?= snippet('foot') ?>

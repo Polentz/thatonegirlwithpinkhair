@@ -37,7 +37,7 @@
     max-width: 80vw;
     transform: translate(-50%, 1rem);
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--main-color);
     pointer-events: none;
     opacity: 0;
@@ -60,15 +60,6 @@
     .closeup-caption {
         transition: none;
     }
-}
-
-.universe-back {
-    position: fixed;
-    left: 1rem;
-    bottom: 1rem;
-    z-index: 9999;
-    color: var(--main-color);
-    text-decoration: none;
 }
 
 /* Readable by screen readers and search engines, hidden on screen. */

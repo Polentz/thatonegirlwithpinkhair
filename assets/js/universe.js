@@ -281,11 +281,11 @@ renderer.domElement.addEventListener("pointermove", (e) => {
     if (!press) {
         container.classList.toggle("is-over-card", !!pickCard(e));
         return;
-    }
+    };
     // Once a press turns into a drag (an orbit), send the close-up card back.
     if (e.pointerId === press.id && Math.hypot(e.clientX - press.x, e.clientY - press.y) > DRAG_SLOP) {
         closeUp(null);
-    }
+    };
 });
 
 const release = (e) => {
@@ -329,7 +329,7 @@ const closeUp = (holder) => {
         holder.traverse((object) => object.layers.set(CLOSE_UP_LAYER));
         moving.add(holder);
         if (holder.userData.text) caption.innerHTML = `<p>${holder.userData.text}</p>`;
-    }
+    };
     caption.classList.toggle("is-visible", !!holder?.userData.text);
 };
 
@@ -374,8 +374,8 @@ const updateCloseUp = () => {
                 holder.scale.copy(homeScale);
                 holder.traverse((object) => object.layers.set(0)); // back in the scene
                 moving.delete(holder);
-            }
-        }
+            };
+        };
     });
 };
 
