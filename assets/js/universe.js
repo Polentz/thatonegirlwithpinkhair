@@ -132,11 +132,23 @@ const makeTextLabel = (html) => {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "rgb(216, 26, 125)";
+    const drawLines = (offsetX) => lines.forEach((l, i) =>
+        ctx.fillText(l, canvas.width / 2 + offsetX, padding + lineHeight * (i + 0.5)));
+
+    // Like CSS text-shadow: the glow layers go underneath and the text itself
+    // is drawn once. Drawing the text once per layer would stack its soft
+    // edges and make it look bold, so each layer draws the text off-canvas
+    // and shifts only its shadow back into place.
+    const offCanvas = canvas.width * 2;
+    ctx.shadowOffsetX = offCanvas;
     glows.forEach(([blur, alpha]) => {
         ctx.shadowColor = `rgba(216, 26, 125, ${alpha})`;
         ctx.shadowBlur = blur * glowScale;
-        lines.forEach((l, i) => ctx.fillText(l, canvas.width / 2, padding + lineHeight * (i + 0.5)));
+        drawLines(-offCanvas);
     });
+    ctx.shadowColor = "transparent";
+    ctx.shadowOffsetX = 0;
+    drawLines(0);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;

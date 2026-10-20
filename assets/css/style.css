@@ -17,6 +17,10 @@ em {
     font-style: italic;
 }
 
+strong {
+    font-weight: bold;
+}
+
 .logo {
     position: fixed;
     top: 1rem;
@@ -40,16 +44,33 @@ body.stamp-mode .logo img:hover {
     filter: drop-shadow(0 0 5px rgba(216, 26, 125, 0.2)) drop-shadow(0 0 5px rgba(216, 26, 125, 0.3)) drop-shadow(0 0 20px rgba(216, 26, 125, 0.3)) drop-shadow(0 0 40px rgba(216, 26, 124, 0.2));
 }
 
-.nav {
+.header {
+    width: 100%;
     position: fixed;
     top: 0;
-    right: 0;
-    z-index: 9999;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 2rem;
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.5),
+        0 0 20px rgb(216, 26, 125, 0.7),
+        0 0 40px rgba(216, 26, 124, 0.8);
+    padding: 1rem;
+    z-index: 9998;
+}
+
+h1 {
+    white-space: nowrap;
+}
+
+.nav {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 2rem;
-    padding: 1rem;
 }
 
 .nav-label {
@@ -69,29 +90,6 @@ body.stamp-mode .logo img:hover {
         0 0 10px rgb(216, 26, 125, 0.2),
         0 0 20px rgb(216, 26, 125, 0.2),
         0 0 40px rgba(216, 26, 125, 0.2);
-}
-
-h1 {
-    /* width: 100%; */
-    position: fixed;
-    /* top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%); */
-    top: 1rem;
-    left: 1rem;
-    /* font-size: 4rem;
-    text-align: center; */
-    font-size: 2rem;
-    text-shadow:
-        0 0 5px rgba(216, 26, 125, 0.2),
-        0 0 10px rgb(216, 26, 125, 0.5),
-        0 0 20px rgb(216, 26, 125, 0.7),
-        0 0 40px rgba(216, 26, 124, 0.8);
-    /* pointer-events: none; */
-    white-space: nowrap;
-    z-index: 9999;
 }
 
 .background {
@@ -281,7 +279,7 @@ body.stamp-mode .stamp-cursor.over-nav {
     top: 1rem;
     right: 1rem;
     width: 35dvw;
-    height: calc(var(--doc-height) - 3rem);
+    max-height: calc(var(--doc-height) - 2rem);
     z-index: 9998;
     box-sizing: border-box;
     overflow-y: auto;
@@ -305,6 +303,11 @@ body.stamp-mode .stamp-cursor.over-nav {
     transform: translateX(0);
     visibility: visible;
     transition: transform .4s ease-in-out, visibility 0s;
+}
+
+.slider#how-to-slider {
+    top: unset;
+    bottom: 1rem;
 }
 
 .slider-button {
@@ -363,7 +366,7 @@ scrollbar {
     justify-content: flex-end;
     gap: 2rem;
     padding: 1rem;
-    z-index: 9999;
+    z-index: 9998;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,6 @@
 <?= snippet('head') ?>
 <?= snippet('header') ?>
 
-<h1>You're logged in as that one girl with pink hair</h1>
 <section class="background"></section>
 
 <section class="drag-layout">
@@ -23,11 +22,13 @@
     <?php endforeach ?>
 </section>
 
+<?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
+<?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
+<?= snippet('slider', ['id' => 'how-to-slider', 'label' => 'how-to', 'text' => $site->howToText()]) ?>
+
 <footer class="footer">
     <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
     <a class="nav-label" href="<?= url('universe') ?>">3D</a>
 </footer>
 
-<?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
-<?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
 <?= snippet('foot') ?>

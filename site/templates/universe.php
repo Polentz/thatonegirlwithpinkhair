@@ -20,8 +20,6 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
 <?= snippet('head') ?>
 <?= snippet('header') ?>
 
-<h1>You're logged in as that one girl with pink hair</h1>
-
 <section class="universe" aria-label="Clusters of images in 3D"></section>
 
 <ul class="universe-fallback">
@@ -29,6 +27,10 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
         <li><?= $cluster['text'] ?></li>
     <?php endforeach ?>
 </ul>
+
+<?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
+<?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
+<?= snippet('slider', ['id' => 'how-to-slider', 'label' => 'how-to', 'text' => $site->howToText()]) ?>
 
 <footer class="footer">
     <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
@@ -48,7 +50,4 @@ foreach (page('home')->clusters()->toStructure() as $cluster) {
 </script>
 <script type="module" src="<?= url('assets/js/universe.js') ?>"></script>
 
-<?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
-<?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>
-<?= snippet('slider', ['id' => 'how-to-slider', 'label' => 'how-to', 'text' => $site->howToText()]) ?>
 <?= snippet('foot') ?>
