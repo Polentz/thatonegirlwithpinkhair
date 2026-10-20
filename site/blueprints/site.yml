@@ -41,4 +41,17 @@ columns:
         templates:
           - home
           - 2d
+      seo:
+        type: fields
+        fields:
+          description:
+            label: SEO Description
+            type: textarea
+            buttons: false
+          keywords:
+            label:
+              en: SEO Keywords
+              it: Parole chiave  
+            type: tags
+            separator: ','
 

@@ -290,7 +290,7 @@ body.stamp-mode .stamp-cursor.over-nav {
     transform: translateX(calc(100% + 40px));
     visibility: hidden;
     transition: transform .4s ease-in-out, visibility 0s linear .4s;
-    z-index: 9998;
+    z-index: 9999;
     scrollbar-width: 0px;
 }
 
@@ -311,7 +311,6 @@ body.stamp-mode .stamp-cursor.over-nav {
 }
 
 .slider-button {
-    width: 100%;
     position: sticky;
     top: 0;
     display: flex;
