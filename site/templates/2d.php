@@ -6,15 +6,14 @@
 <?php
 // Clusters with images, numbered in order; the number names each cluster's
 // "Read more" panel (read-more-1, read-more-2…), the same way as on the 3D page.
-$clusters = $page->clusters()->toStructure()->filter(fn ($c) => $c->images()->toFiles()->isNotEmpty());
+$clusters = $page->clusters()->toStructure()->filter(fn($c) => $c->images()->toFiles()->isNotEmpty());
 ?>
 <section class="drag-layout">
     <?php $n = 0 ?>
     <?php foreach ($clusters as $cluster): ?>
         <?php $n++ ?>
-            <div class="cluster" data-filters="<?= esc(json_encode($cluster->filters()->split()), 'attr') ?>">
+        <div class="cluster" data-filters="<?= esc(json_encode($cluster->filters()->split()), 'attr') ?>">
             <?php if ($cluster->text()->isNotEmpty() || $cluster->readMore()->isNotEmpty()): ?>
-                <?php /* Placed together at the cluster's centre: "Read more" right under the text. */ ?>
                 <div class="cluster-label">
                     <?php if ($cluster->text()->isNotEmpty()): ?>
                         <p class="cluster-text"><?= $cluster->text() ?></p>
@@ -27,7 +26,7 @@ $clusters = $page->clusters()->toStructure()->filter(fn ($c) => $c->images()->to
             <?php endif ?>
             <?php foreach ($cluster->images()->toFiles() as $file): ?>
                 <div class="drag-element">
-                    <div class="drag-element-wrapper draggable">
+                    <div class="drag-element-wrapper">
                         <img class="drag-image" src="<?= $file->resize(600)->url() ?>">
                     </div>
                 </div>

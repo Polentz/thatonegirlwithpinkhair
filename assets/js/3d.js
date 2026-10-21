@@ -92,7 +92,7 @@ const glowMaterial = (() => {
 const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT } = {}) => {
     const text = new DOMParser().parseFromString(html, "text/html").body.textContent.trim();
 
-    const fontSize = 64;
+    const fontSize = 20;
     const lineHeight = fontSize * 1.2;
     const glowScale = fontSize / 20; // the site's glow is sized for ~20px text
     const glows = [[40, 0.8], [20, 0.7], [10, 0.5], [5, 0.2]]; // same layers as the CSS text-shadow

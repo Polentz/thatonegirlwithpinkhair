@@ -583,6 +583,9 @@ const filtersMenu = () => {
         option.addEventListener("click", () => {
             const filter = option.dataset.filter; // "" for All
             options.forEach((o) => o.classList.toggle("is-active", o === option));
+            // Mark the label with a superscript 1 while a filter is on.
+            const count = toggle.querySelector(".filters-count");
+            if (count) count.hidden = !filter;
 
             // 2D: fade clusters out/in (in CSS), one after another.
             const changing = Array.from(document.querySelectorAll(".cluster")).filter((cluster) => {

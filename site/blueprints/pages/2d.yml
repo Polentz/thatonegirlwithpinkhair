@@ -14,65 +14,68 @@ options:
   sort: false
   update: true
 
-
-sections:
-  content:
-    type: fields
-    fields:
-      howToText:
-        label: How to Text
-        type: writer
-        marks:
-          - bold
-          - italic
-          - underline
-          - strike
-          - link
-          - email
-          - clear
-        nodes: false
-      filterList:
-        label: Filters
-        type: tags
-        help: The filters visitors can choose from. Assign them to each cluster below; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.
-      clusters:
-        label: Clusters
-        type: structure
-        help: Each cluster is a group of images with its text.
-        columns:
-          images:
-            width: 1/2
-          text:
-            width: 1/4
-          filters:
-            width: 1/4
+columns:
+  main:
+    width: 2/3
+    sections:
+      content:
+        type: fields
         fields:
-          images:
-            label: Images
-            type: files
-            template: image
-            uploads: image
-            multiple: true
-            image:
-              icon: true
-              ratio: 4/3
-              back: white
-              cover: true
-          text:
-            label: Text
+          clusters:
+            label: Clusters
+            type: structure
+            help: Each cluster is a group of images with its text.
+            columns:
+              images:
+                width: 1/2
+              text:
+                width: 1/4
+              filters:
+                width: 1/4
+            fields:
+              filters:
+                label: Filters
+                type: multiselect
+                options:
+                  type: query
+                  query: page.filterList.split
+              text:
+                label: Title
+                type: writer
+                marks: false
+                nodes: false
+              images:
+                label: Images
+                type: files
+                template: image
+                uploads: image
+                multiple: true
+                image:
+                  icon: true
+                  ratio: 4/3
+                  back: white
+                  cover: true
+              readMore:
+                label: Read more
+                type: writer
+                help: Optional. When filled, a "Read more" button appears among the cluster's images and opens this text in a side panel.
+                marks:
+                  - bold
+                  - italic
+                  - underline
+                  - strike
+                  - link
+                  - email
+                  - clear
+  sidebar:
+    width: 1/3
+    sections:
+      features:
+        type: fields
+        fields:
+          howToText:
+            label: How to Text
             type: writer
-            marks:
-              - bold
-              - italic
-              - underline
-              - strike
-              - link
-              - clear
-            nodes: false
-          readMore:
-            label: Read more
-            type: writer
-            help: Optional. When filled, a "Read more" button appears among the cluster's images and opens this text in a side panel.
             marks:
               - bold
               - italic
@@ -81,9 +84,8 @@ sections:
               - link
               - email
               - clear
-          filters:
+            nodes: false
+          filterList:
             label: Filters
-            type: multiselect
-            options:
-              type: query
-              query: page.filterList.split
+            type: tags
+            help: The filters visitors can choose from. Assign them to each cluster below; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.

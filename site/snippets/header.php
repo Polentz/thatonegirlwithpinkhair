@@ -26,7 +26,7 @@
         <?php if (!empty($filters)): ?>
             <div class="nav-filters">
                 <a class="nav-label filters-toggle" href="#filters-list" aria-controls="filters-list"
-                    aria-expanded="false">Filters</a>
+                    aria-expanded="false">Filters<span class="filters-count" hidden>*</span></a>
                 <ul class="filters-list" id="filters-list" hidden>
                     <li><button class="filter-option is-active" type="button" data-filter="">All</button></li>
                     <?php foreach ($filters as $filter): ?>
