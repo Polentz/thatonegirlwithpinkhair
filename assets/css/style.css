@@ -494,24 +494,120 @@ body.stamp-mode .stamp-cursor.over-nav {
     }
 }
 
+/* Tablets and small laptops: the title may wrap instead of pushing the nav
+   off-screen, and the header/footer text gets a bit smaller. */
+@media screen and (max-width: 1100px) {
+
+    .header {
+        gap: 2rem;
+        font-size: 1.5rem;
+    }
+
+    h1 {
+        flex: 1 1 auto;
+        min-width: 0;
+        white-space: normal;
+    }
+
+    .nav {
+        flex-shrink: 0;
+        gap: 1.5rem;
+    }
+
+    .nav-label,
+    .filter-option {
+        font-size: 1.5rem;
+    }
+
+    .slider {
+        max-width: 50dvw;
+    }
+}
+
+/* Phones: title on top with the nav under it, panels almost full width,
+   everything sized for small screens. */
 @media screen and (max-width: 720px) {
+
+    body {
+        font-size: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .nav {
+        justify-content: center;
+        gap: 1.25rem;
+    }
+
+    .nav-label,
+    .filter-option {
+        font-size: 1.25rem;
+    }
+
+    .filters-count {
+        margin-left: 0.15rem;
+    }
+
+    .filters-list {
+        width: 100%;
+        left: 0;
+        right: auto;
+        align-items: center;
+    }
+
+    .footer {
+        gap: 1.25rem;
+        padding: 0.75rem;
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+
+    .slider {
+        top: 0.75rem;
+        right: 0.75rem;
+        left: 0.75rem;
+        width: auto;
+        max-width: none;
+        max-height: calc(var(--doc-height) - 1.5rem);
+        border-radius: 0.75rem;
+    }
+
+    .slider#how-to-slider {
+        bottom: 0.75rem;
+    }
+
+    .slider-button {
+        padding: 0.75rem;
+    }
+
+    .slider-close {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .slider-content {
+        padding: 0.75rem;
+    }
+
+    .closeup-caption {
+        max-width: 90vw;
+        font-size: 1rem;
+    }
 
     .cluster-text {
         max-width: calc(10vw * var(--card-scale, 1));
     }
 
-    body {
-        font-size: 0.75rem;
-    }
-
-    .slider {
-        width: calc(100svw - 3rem);
-        padding: 4rem 1rem 1rem;
-    }
-
-    h1,
-    .header .nav {
-        font-size: 1rem;
+    .read-more {
+        padding: 0.35rem 0.75rem;
     }
 
     .drag-element-wrapper {
