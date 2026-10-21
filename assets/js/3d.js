@@ -95,9 +95,7 @@ const glowMaterial = (() => {
 
 // The cluster's text as a glowing pink label drawn into the 3D scene, so cards
 // in front of it can cover it. Wrapped to TEXT_MAX_WIDTH.
-// Options: lineHeight (world units) and underline, used for the "Read more"
-// button.
-const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT, underline = false } = {}) => {
+const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT } = {}) => {
     const text = new DOMParser().parseFromString(html, "text/html").body.textContent.trim();
 
     const fontSize = 64;
@@ -138,10 +136,6 @@ const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT, u
         const x = canvas.width / 2 + offsetX;
         const y = padding + lineHeight * (i + 0.5);
         ctx.fillText(l, x, y);
-        if (underline) {
-            const width = ctx.measureText(l).width;
-            ctx.fillRect(x - width / 2, y + fontSize * 0.5, width, fontSize * 0.06);
-        }
     });
 
     // Like CSS text-shadow: the glow layers go underneath and the text itself
@@ -167,13 +161,109 @@ const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT, u
         new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
     );
     label.raycast = () => { }; // not clickable
+    label.userData.textHeight = lines.length * worldLineHeight; // without the glow padding
     return label;
+};
+
+// "Read more" drawn like the 2D button (.read-more in style.css): a white pill
+// with a thin pink border and glowing pink text; on hover it fills pink with
+// white text and a softer glow. Both looks are drawn once and crossfaded.
+// Sizes follow the CSS in em: text the size of the cluster text, padding
+// 2/3em × 4/3em (.5rem 1rem at 12px), border 1/12em (1px), line-height 1.
+const READ_MORE_FONT = TEXT_LINE_HEIGHT / 1.2; // the cluster text's font size, in world units
+
+const makeReadMoreButton = (text) => {
+    const fontSize = 64; // canvas px per em
+    const pxPerUnit = fontSize / READ_MORE_FONT;
+    const glowScale = fontSize / 20; // the site's glow is sized for ~20px text
+    const font = `${fontSize}px Helvetica, Arial, sans-serif`;
+    const pink = "rgb(216, 26, 125)";
+
+    const measure = document.createElement("canvas").getContext("2d");
+    measure.font = font;
+    const padX = fontSize * 4 / 3;
+    const padY = fontSize * 2 / 3;
+    const border = fontSize / 12;
+    const margin = fontSize * 2; // room for the text glow around the pill
+    const pillW = measure.measureText(text).width + padX * 2;
+    const pillH = fontSize + padY * 2;
+
+    const draw = (hover) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(pillW + margin * 2);
+        canvas.height = Math.ceil(pillH + margin * 2);
+        const ctx = canvas.getContext("2d");
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        ctx.beginPath();
+        ctx.roundRect(cx - pillW / 2 + border / 2, cy - pillH / 2 + border / 2, pillW - border, pillH - border, pillH / 2);
+        ctx.fillStyle = hover ? pink : "#fff";
+        ctx.fill();
+        ctx.lineWidth = border;
+        ctx.strokeStyle = pink;
+        ctx.stroke();
+
+        // Glow under the text, then the text once (see makeTextLabel).
+        ctx.font = font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const glows = hover
+            ? [[40, 0.2], [20, 0.2], [10, 0.2], [5, 0.2]]
+            : [[40, 0.8], [20, 0.7], [10, 0.5], [5, 0.2]];
+        const offCanvas = canvas.width * 2;
+        ctx.fillStyle = pink;
+        ctx.shadowOffsetX = offCanvas;
+        glows.forEach(([blur, alpha]) => {
+            ctx.shadowColor = `rgba(216, 26, 125, ${alpha})`;
+            ctx.shadowBlur = blur * glowScale;
+            ctx.fillText(text, cx - offCanvas, cy);
+        });
+        ctx.shadowColor = "transparent";
+        ctx.shadowOffsetX = 0;
+        ctx.fillStyle = hover ? "#fff" : pink;
+        ctx.fillText(text, cx, cy);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return { texture, width: canvas.width / pxPerUnit, height: canvas.height / pxPerUnit };
+    };
+
+    const normal = draw(false);
+    const hovered = draw(true);
+    const geometry = new THREE.PlaneGeometry(normal.width, normal.height);
+
+    const button = new THREE.Mesh(geometry,
+        new THREE.MeshBasicMaterial({ map: normal.texture, transparent: true, depthWrite: false }));
+    const hoverLayer = new THREE.Mesh(geometry,
+        new THREE.MeshBasicMaterial({ map: hovered.texture, transparent: true, depthWrite: false, opacity: 0 }));
+    hoverLayer.position.z = 0.001;
+    button.add(hoverLayer);
+
+    // Only the pill is clickable, not the glow around it.
+    const hitArea = new THREE.Mesh(
+        new THREE.PlaneGeometry(pillW / pxPerUnit, pillH / pxPerUnit),
+        new THREE.MeshBasicMaterial({ visible: false })
+    );
+    button.add(hitArea);
+    button.raycast = () => { };
+    hoverLayer.raycast = () => { };
+
+    button.userData = {
+        height: pillH / pxPerUnit,
+        hitArea,
+        hover: 0, // 0 normal … 1 hovered, eased each frame
+        baseMaterial: button.material,
+        hoverMaterial: hoverLayer.material,
+    };
+    return button;
 };
 
 const loader = new THREE.TextureLoader();
 const clusters = []; // { group, text, filters }
 const cards = [];   // card meshes, for picking
-const clickables = []; // cards and "Read more" buttons
+const clickables = []; // cards and "Read more" hit areas
+const readMoreButtons = []; // { button, cluster }
 const holders = []; // card + glow pairs and text labels, turned to face the camera every frame
 
 const clusterCentres = scatterPoints(data.length, UNIVERSE_RADIUS, CLUSTER_SPACING);
@@ -198,26 +288,33 @@ data.forEach((clusterData, i) => {
 
     // The text sits at the cluster's centre; the cards keep clear of it.
     const taken = [];
+    let label = null;
     if (clusterData.text) {
-        const label = makeTextLabel(clusterData.text);
+        label = makeTextLabel(clusterData.text);
         cluster.fadeMaterials.push(label.material);
         group.add(label);
         holders.push(label); // faces the camera like the cards
         taken.push(new THREE.Vector3());
     }
-    // One spot per image, plus one for the "Read more" button if there is one.
-    const spots = clusterData.images.length + (clusterData.readMore ? 1 : 0);
-    const offsets = scatterPoints(spots, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
+    if (!label && clusterData.readMore) taken.push(new THREE.Vector3()); // keep the centre for the button
+    const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
 
+    // "Read more" sits right under the text. As a child of the text label it
+    // turns with it, so it stays under the text on screen from any angle.
     if (clusterData.readMore) {
-        const button = makeTextLabel("Read more", { lineHeight: TEXT_LINE_HEIGHT * 0.8, underline: true });
-        button.raycast = THREE.Mesh.prototype.raycast; // clickable, unlike the text label
-        button.position.copy(offsets[clusterData.images.length]);
-        button.userData = { cluster, readMore: clusterData.readMore };
-        cluster.fadeMaterials.push(button.material);
-        group.add(button);
-        holders.push(button); // faces the camera
-        clickables.push(button);
+        const button = makeReadMoreButton("Read more");
+        const { hitArea } = button.userData;
+        hitArea.userData = { cluster, readMore: clusterData.readMore, button };
+        clickables.push(hitArea);
+        readMoreButtons.push({ button, cluster });
+        if (label) {
+            const gap = READ_MORE_FONT * 0.25; // 0.25em, as in .cluster-label
+            button.position.y = -(label.userData.textHeight / 2 + gap + button.userData.height / 2);
+            label.add(button);
+        } else {
+            group.add(button); // no text: the button takes the centre
+            holders.push(button); // faces the camera
+        }
     }
 
     // Own copy of the glow (same texture), so this cluster can fade alone.
@@ -333,7 +430,9 @@ renderer.domElement.addEventListener("wheel", () => closeUp(null), { passive: tr
 
 renderer.domElement.addEventListener("pointermove", (e) => {
     if (!press) {
-        container.classList.toggle("is-over-card", !!pickCard(e));
+        const hit = pickCard(e);
+        container.classList.toggle("is-over-card", !!hit);
+        hoveredButton = hit?.object.userData.button || null;
         return;
     };
     // Once a press turns into a drag (an orbit), send the close-up card back.
@@ -407,6 +506,20 @@ const setClusterOpacity = (cluster, opacity) => {
 };
 
 const easeInOut = (t) => t * t * (3 - 2 * t);
+
+// "Read more" buttons: ease each towards its hover look (about .35s, like the
+// 2D transition) and follow its cluster's filter fade.
+let hoveredButton = null;
+
+const updateReadMoreButtons = () => {
+    readMoreButtons.forEach(({ button, cluster }) => {
+        const data = button.userData;
+        const target = button === hoveredButton ? 1 : 0;
+        data.hover += (target - data.hover) * (reduceMotion ? 1 : 0.15);
+        data.baseMaterial.opacity = cluster.opacity;
+        data.hoverMaterial.opacity = cluster.opacity * easeInOut(Math.min(1, Math.max(0, data.hover)));
+    });
+};
 
 const updateFilterAnimations = (now) => {
     clusters.forEach((cluster) => {
@@ -525,6 +638,7 @@ renderer.setAnimationLoop(() => {
     controls.update();
     updateCloseUp();
     updateFilterAnimations(performance.now());
+    updateReadMoreButtons();
     updateCaption();
 
     // Cards always face the viewer.

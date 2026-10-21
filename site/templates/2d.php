@@ -13,12 +13,17 @@ $clusters = $page->clusters()->toStructure()->filter(fn ($c) => $c->images()->to
     <?php foreach ($clusters as $cluster): ?>
         <?php $n++ ?>
             <div class="cluster" data-filters="<?= esc(json_encode($cluster->filters()->split()), 'attr') ?>">
-            <?php if ($cluster->text()->isNotEmpty()): ?>
-                <p class="cluster-text"><?= $cluster->text() ?></p>
-            <?php endif ?>
-            <?php if ($cluster->readMore()->isNotEmpty()): ?>
-                <button class="read-more slider-toggle" type="button" aria-controls="read-more-<?= $n ?>"
-                    aria-expanded="false">Read more</button>
+            <?php if ($cluster->text()->isNotEmpty() || $cluster->readMore()->isNotEmpty()): ?>
+                <?php /* Placed together at the cluster's centre: "Read more" right under the text. */ ?>
+                <div class="cluster-label">
+                    <?php if ($cluster->text()->isNotEmpty()): ?>
+                        <p class="cluster-text"><?= $cluster->text() ?></p>
+                    <?php endif ?>
+                    <?php if ($cluster->readMore()->isNotEmpty()): ?>
+                        <button class="read-more slider-toggle" type="button" aria-controls="read-more-<?= $n ?>"
+                            aria-expanded="false">Read more</button>
+                    <?php endif ?>
+                </div>
             <?php endif ?>
             <?php foreach ($cluster->images()->toFiles() as $file): ?>
                 <div class="drag-element">

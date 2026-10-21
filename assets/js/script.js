@@ -673,11 +673,10 @@ const packCluster = (cluster) => {
         width: el.offsetWidth, height: el.offsetHeight,
     });
 
-    const text = cluster.querySelector(".cluster-text");
+    const text = cluster.querySelector(".cluster-label"); // text + "Read more"
     if (text) boxes.set(text, boxAt(text, 0, 0));
 
-    // Images and the "Read more" button, in random order.
-    const images = Array.from(cluster.querySelectorAll(".drag-element, .read-more"));
+    const images = Array.from(cluster.querySelectorAll(".drag-element"));
     for (let i = images.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [images[i], images[j]] = [images[j], images[i]];

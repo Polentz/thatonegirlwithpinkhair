@@ -154,6 +154,7 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .cluster,
     .cluster.is-filtered-out {
         transition: none;
@@ -212,8 +213,20 @@ h1 {
 }
 
 /* The cluster's text, scattered among its images like one of them. */
-.cluster-text {
+/* The cluster's text with its "Read more" button right under it, placed
+   together at the cluster's centre. */
+.cluster-label {
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25em;
+    font-size: calc(0.75rem * var(--card-scale, 1));
+    pointer-events: none;
+    /* only the button inside is clickable */
+}
+
+.cluster-text {
     max-width: calc(4vw * var(--card-scale, 1));
     margin: 0;
     font-size: calc(0.75rem * var(--card-scale, 1));
@@ -242,30 +255,32 @@ h1 {
     text-shadow: none;
 }
 
-/* "Read more" button placed among a cluster's images; opens its side panel. */
 .read-more {
-    position: absolute;
-    padding: 0;
-    border: none;
-    background: none;
+    padding: .5rem 1rem;
+    pointer-events: auto;
+    border: solid 1px var(--main-color);
+    border-radius: 2rem;
+    background: var(--white-color);
     font: inherit;
     font-size: calc(0.75rem * var(--card-scale, 1));
-    line-height: 1.1;
+    line-height: 1;
     color: var(--main-color);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
     white-space: nowrap;
     cursor: pointer;
-    opacity: 0; /* faded in with the images once placed */
+    opacity: 0;
+    /* faded in with the images once placed */
     text-shadow:
         0 0 0.25em rgba(216, 26, 125, 0.2),
         0 0 0.5em rgb(216, 26, 125, 0.5),
         0 0 1em rgb(216, 26, 125, 0.7),
         0 0 2em rgba(216, 26, 124, 0.8);
-    transition: text-shadow .25s ease-in-out;
+    transition: all .35s ease-in-out;
+    z-index: 9999;
 }
 
 .read-more:hover {
+    background: var(--main-color);
+    color: var(--white-color);
     text-shadow:
         0 0 0.25em rgba(216, 26, 125, 0.2),
         0 0 0.5em rgb(216, 26, 125, 0.2),
