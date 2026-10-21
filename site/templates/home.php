@@ -47,7 +47,6 @@ foreach ($page->clusters()->toStructure() as $cluster) {
 
 <footer class="footer">
     <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
-    <a class="nav-label" href="<?= url('2d') ?>">2D</a>
 </footer>
 
 <script type="importmap">
