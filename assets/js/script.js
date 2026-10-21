@@ -268,8 +268,8 @@ const dashboardControls = () => {
 
     // Smoothed scale setters. Drive scaleX/scaleY (not the "scale" shorthand):
     // quickTo uses resetTo, which can't reset a shorthand that splits in two.
-    const toScaleX = gsap.quickTo(layout, "scaleX", { duration: 0.4, ease: "power3.out", onUpdate: () => panUpdater() });
-    const toScaleY = gsap.quickTo(layout, "scaleY", { duration: 0.4, ease: "power3.out" });
+    const toScaleX = gsap.quickTo(layout, "scaleX", { duration: 0.1, ease: "power3.out", onUpdate: () => panUpdater() });
+    const toScaleY = gsap.quickTo(layout, "scaleY", { duration: 0.1, ease: "power3.out" });
     const applyScale = () => {
         // Start from the live scale: a close-up animation may have changed it.
         const live = gsap.getProperty(layout, "scaleX") || 1;
