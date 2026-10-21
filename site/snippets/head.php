@@ -32,7 +32,6 @@
     ]) ?>
     <noscript>Please turn on JS to navigate this website</noscript>
     <?php if ($page->intendedTemplate()->name() === 'home'): ?>
-        <?php /* 3D prototype: no p5/2D layout, script.js only for the sliders */ ?>
         <?= js('assets/js/script.js') ?>
     <?php else: ?>
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>

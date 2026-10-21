@@ -1,10 +1,3 @@
-// 3D prototype: the home page clusters float in space as groups of image
-// cards. Drag empty space to orbit, wheel/pinch to zoom, right-drag to pan.
-// The first click on a card marks where the trail starts; each later click draws a pink
-// line from the previous click to that spot. A click also brings the card up close, captioned with its cluster's text; it floats back
-// on the next click, drag, zoom or Escape. Each cluster shows its text among
-// its images. Dragging on a card orbits, like empty space.
-
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
@@ -570,8 +563,13 @@ const closeUp = (holder) => {
         moving.add(holder);
         if (holder.userData.text) caption.innerHTML = `<p>${holder.userData.text}</p>`;
     };
-    caption.classList.toggle("is-visible", !!holder?.userData.text);
+    // The caption fades in only once the card has grown to its close-up size
+    // (updateCloseUp); until then, and when there's no card, it's hidden.
+    captionPending = !!holder?.userData.text;
+    caption.classList.remove("is-visible");
 };
+
+let captionPending = false;
 
 const captionAnchor = new THREE.Vector3();
 const captionCorner = new THREE.Vector3();
@@ -615,6 +613,11 @@ const updateCloseUp = () => {
 
             holder.position.lerp(closeUpSpot, ease);
             holder.scale.lerp(targetScale.setScalar(scale), ease);
+
+            if (captionPending && holder.scale.x >= scale * 0.97) {
+                captionPending = false;
+                caption.classList.add("is-visible");
+            }
         } else {
             holder.position.lerp(home, ease);
             holder.scale.lerp(homeScale, ease);

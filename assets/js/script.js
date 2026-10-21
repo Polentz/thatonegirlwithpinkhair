@@ -293,7 +293,7 @@ const dashboardControls = () => {
     let animating = false;
     const view = { s: 1, x: 0, y: 0 }; // tweened, then written to the layout
 
-    const animateView = (s, x, y) => {
+    const animateView = (s, x, y, onDone) => {
         gsap.killTweensOf(layout); // stop any wheel-zoom easing
         gsap.killTweensOf(view);
         view.s = gsap.getProperty(layout, "scaleX") || 1;
@@ -318,6 +318,7 @@ const dashboardControls = () => {
                 animating = false;
                 layout.classList.remove("is-zooming");
                 updateCursor();
+                onDone?.();
             },
         });
     };
@@ -346,15 +347,19 @@ const dashboardControls = () => {
         const width = element.offsetWidth;
         const height = element.offsetHeight;
         const s = size * Math.min(window.innerHeight / height, window.innerWidth / width);
-        animateView(s, window.innerWidth / 2 - originX - dx * s, window.innerHeight / 2 - originY - dy * s);
+        // The caption fades in only once the zoom has finished (and only if
+        // this image is still the one in close-up by then).
+        caption.classList.remove("is-visible");
+        animateView(s, window.innerWidth / 2 - originX - dx * s, window.innerHeight / 2 - originY - dy * s, () => {
+            if (focused === element) caption.classList.toggle("is-visible", !!html);
+        });
 
         // Caption under where the image will end up; fades in as it arrives.
         caption.innerHTML = html ? `<p>${html}</p>` : "";
         caption.style.left = `${window.innerWidth / 2}px`;
         caption.style.top = `${window.innerHeight / 2 + (height * s) / 2}px`;
         caption.style.maxWidth = `${width * s}px`; // no wider than the image
-        caption.style.transitionDelay = `${CLOSE_UP_DURATION * 0.6}s`;
-        caption.classList.toggle("is-visible", !!html);
+        caption.style.transitionDelay = "0s";
     };
 
     const unfocus = () => {
