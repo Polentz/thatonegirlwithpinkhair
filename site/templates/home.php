@@ -1,6 +1,8 @@
 <?php
-// Same clusters as the home page, handed to 3d.js as JSON.
+// Same clusters as the 2D page, handed to 3d.js as JSON. Clusters with images
+// are numbered in order; the number names each "Read more" panel, as on 2D.
 $clusters = [];
+$readMorePanels = []; // panel id => [title, text]
 foreach (page('2d')->clusters()->toStructure() as $cluster) {
     $images = [];
     foreach ($cluster->images()->toFiles() as $file) {
@@ -11,10 +13,16 @@ foreach (page('2d')->clusters()->toStructure() as $cluster) {
     }
     if (empty($images))
         continue;
+    $readMoreId = null;
+    if ($cluster->readMore()->isNotEmpty()) {
+        $readMoreId = 'read-more-' . (count($clusters) + 1);
+        $readMorePanels[$readMoreId] = [$cluster->text(), $cluster->readMore()];
+    }
     $clusters[] = [
         'text' => $cluster->text()->value(),
         'images' => $images,
         'filters' => $cluster->filters()->split(),
+        'readMore' => $readMoreId,
     ];
 }
 ?>
@@ -28,6 +36,10 @@ foreach (page('2d')->clusters()->toStructure() as $cluster) {
         <li><?= $cluster['text'] ?></li>
     <?php endforeach ?>
 </ul>
+
+<?php foreach ($readMorePanels as $id => [$title, $text]): ?>
+    <?= snippet('slider', ['id' => $id, 'label' => 'read more', 'title' => $title, 'text' => $text]) ?>
+<?php endforeach ?>
 
 <?= snippet('slider', ['id' => 'info-slider', 'label' => 'info', 'text' => $site->infoText()]) ?>
 <?= snippet('slider', ['id' => 'contact-slider', 'label' => 'contact', 'text' => $site->contactText()]) ?>

@@ -24,6 +24,7 @@ Clusters:
     - file://9hkq156actf6jyqj
     - file://1xniow7ucwfrvaec
   text: "<p>you're not chic or whimsical, your internet vocabulary is stunted and you're infantilising yourself and buying too many things</p>"
+  readmore: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
   filters: Ai
   category: ""
 - 
@@ -35,6 +36,7 @@ Clusters:
     - file://7i1mmvwseek8kcig
     - file://k1npshketjhna9un
   text: Trad wives
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -46,6 +48,7 @@ Clusters:
     - file://9hkq156actf6jyqj
     - file://kdkvpyu6uk3j35vi
   text: "I'm just a girl"
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -57,6 +60,7 @@ Clusters:
     - file://2brzt5ujdguxvorz
     - file://dxfqwsk0qnt0iljq
   text: Ai slop
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -68,6 +72,7 @@ Clusters:
     - file://d0hxvfjtyg1onfqm
     - file://ux7yzkzgtximozng
   text: Distrust in the feed
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -79,6 +84,7 @@ Clusters:
     - file://wdrylaaw7sfih3wl
     - file://xdc8pcc5kgfiufqh
   text: Reaction pics
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -90,6 +96,7 @@ Clusters:
     - file://mbvnpq8mbtbfzklo
     - file://pz7u5wcucqel613u
   text: Going analog
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -100,6 +107,7 @@ Clusters:
     - file://rn9tmm6tuiank0fa
     - file://vbzg0r8vnzjtdffx
   text: The algorithm is personalized
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -110,6 +118,7 @@ Clusters:
     - file://zr6izpnezxqsovqo
     - file://q1wgrgzpyljoddbp
   text: Cottagecore
+  readmore: ""
   filters: ""
   category: ""
 - 
@@ -120,6 +129,7 @@ Clusters:
     - file://828h8rwlp8a2l9x1
     - file://cgn6i4iipuc3x21r
   text: A life online is a life performed
+  readmore: ""
   filters: ""
   category: ""
 

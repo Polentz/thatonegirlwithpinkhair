@@ -95,7 +95,9 @@ const glowMaterial = (() => {
 
 // The cluster's text as a glowing pink label drawn into the 3D scene, so cards
 // in front of it can cover it. Wrapped to TEXT_MAX_WIDTH.
-const makeTextLabel = (html) => {
+// Options: lineHeight (world units) and underline, used for the "Read more"
+// button.
+const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT, underline = false } = {}) => {
     const text = new DOMParser().parseFromString(html, "text/html").body.textContent.trim();
 
     const fontSize = 64;
@@ -103,7 +105,7 @@ const makeTextLabel = (html) => {
     const glowScale = fontSize / 20; // the site's glow is sized for ~20px text
     const glows = [[40, 0.8], [20, 0.7], [10, 0.5], [5, 0.2]]; // same layers as the CSS text-shadow
     const padding = 40 * glowScale;
-    const pxPerUnit = lineHeight / TEXT_LINE_HEIGHT;
+    const pxPerUnit = lineHeight / worldLineHeight;
     const font = `${fontSize}px Helvetica, Arial, sans-serif`;
 
     const canvas = document.createElement("canvas");
@@ -132,8 +134,15 @@ const makeTextLabel = (html) => {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "rgb(216, 26, 125)";
-    const drawLines = (offsetX) => lines.forEach((l, i) =>
-        ctx.fillText(l, canvas.width / 2 + offsetX, padding + lineHeight * (i + 0.5)));
+    const drawLines = (offsetX) => lines.forEach((l, i) => {
+        const x = canvas.width / 2 + offsetX;
+        const y = padding + lineHeight * (i + 0.5);
+        ctx.fillText(l, x, y);
+        if (underline) {
+            const width = ctx.measureText(l).width;
+            ctx.fillRect(x - width / 2, y + fontSize * 0.5, width, fontSize * 0.06);
+        }
+    });
 
     // Like CSS text-shadow: the glow layers go underneath and the text itself
     // is drawn once. Drawing the text once per layer would stack its soft
@@ -164,6 +173,7 @@ const makeTextLabel = (html) => {
 const loader = new THREE.TextureLoader();
 const clusters = []; // { group, text, filters }
 const cards = [];   // card meshes, for picking
+const clickables = []; // cards and "Read more" buttons
 const holders = []; // card + glow pairs and text labels, turned to face the camera every frame
 
 const clusterCentres = scatterPoints(data.length, UNIVERSE_RADIUS, CLUSTER_SPACING);
@@ -195,7 +205,20 @@ data.forEach((clusterData, i) => {
         holders.push(label); // faces the camera like the cards
         taken.push(new THREE.Vector3());
     }
-    const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
+    // One spot per image, plus one for the "Read more" button if there is one.
+    const spots = clusterData.images.length + (clusterData.readMore ? 1 : 0);
+    const offsets = scatterPoints(spots, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
+
+    if (clusterData.readMore) {
+        const button = makeTextLabel("Read more", { lineHeight: TEXT_LINE_HEIGHT * 0.8, underline: true });
+        button.raycast = THREE.Mesh.prototype.raycast; // clickable, unlike the text label
+        button.position.copy(offsets[clusterData.images.length]);
+        button.userData = { cluster, readMore: clusterData.readMore };
+        cluster.fadeMaterials.push(button.material);
+        group.add(button);
+        holders.push(button); // faces the camera
+        clickables.push(button);
+    }
 
     // Own copy of the glow (same texture), so this cluster can fade alone.
     const clusterGlow = glowMaterial.clone();
@@ -223,6 +246,7 @@ data.forEach((clusterData, i) => {
 
         card.userData = { cluster, holder };
         cards.push(card);
+        clickables.push(card);
         holders.push(holder);
     });
 });
@@ -284,8 +308,8 @@ const aimAt = (e) => {
 
 const pickCard = (e) => {
     aimAt(e);
-    // Cards of clusters hidden by a filter can't be clicked.
-    return raycaster.intersectObjects(cards, false)
+    // Cards and buttons of clusters hidden by a filter can't be clicked.
+    return raycaster.intersectObjects(clickables, false)
         .find((hit) => hit.object.userData.cluster.shown);
 };
 
@@ -326,6 +350,9 @@ const release = (e) => {
 
     const hit = pickCard(e);
     if (!hit) return closeUp(null); // empty space sends the close-up card back
+
+    // "Read more" opens the cluster's side panel (sliders in script.js).
+    if (hit.object.userData.readMore) return window.openSlider?.(hit.object.userData.readMore);
 
     const { cluster, holder } = hit.object.userData;
     if (holder === closeUpHolder) return closeUp(null); // clicking it again sends it back

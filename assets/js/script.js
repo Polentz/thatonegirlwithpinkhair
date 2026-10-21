@@ -496,25 +496,40 @@ const dashboardControls = () => {
 // Each .slider-toggle opens the panel named by its aria-controls. Only one
 // panel is open at a time; the X, Escape or a click outside closes it.
 const sliders = () => {
-    const pairs = Array.from(document.querySelectorAll(".slider-toggle"))
-        .map((toggle) => ({ toggle, slider: document.getElementById(toggle.getAttribute("aria-controls")) }))
-        .filter(({ slider }) => slider);
+    // Every panel, with the toggles that point at it (a panel may have none:
+    // the 3D page opens "Read more" panels through window.openSlider).
+    const pairs = Array.from(document.querySelectorAll(".slider")).map((slider) => ({
+        slider,
+        toggles: Array.from(document.querySelectorAll(`.slider-toggle[aria-controls="${slider.id}"]`)),
+    }));
     if (!pairs.length) return;
 
-    const setOpen = ({ toggle, slider }, open) => {
+    const setOpen = ({ toggles, slider }, open) => {
         slider.classList.toggle("is-open", open);
         slider.setAttribute("aria-hidden", String(!open));
-        toggle.setAttribute("aria-expanded", String(open));
+        toggles.forEach((toggle) => toggle.setAttribute("aria-expanded", String(open)));
     };
     const closeAll = () => pairs.forEach((pair) => setOpen(pair, false));
 
+    // A panel opened from a click elsewhere (the 3D canvas) shouldn't be
+    // closed again straight away by that same click reaching the document.
+    let ignoreClicksUntil = 0;
+
+    window.openSlider = (id) => {
+        const pair = pairs.find(({ slider }) => slider.id === id);
+        if (!pair) return;
+        closeAll();
+        setOpen(pair, true);
+        ignoreClicksUntil = performance.now() + 300;
+    };
+
     pairs.forEach((pair) => {
-        pair.toggle.addEventListener("click", (e) => {
+        pair.toggles.forEach((toggle) => toggle.addEventListener("click", (e) => {
             e.preventDefault();
             const wasOpen = pair.slider.classList.contains("is-open");
             closeAll();
             if (!wasOpen) setOpen(pair, true);
-        });
+        }));
 
         pair.slider.querySelector(".slider-close")?.addEventListener("click", () => setOpen(pair, false));
     });
@@ -524,6 +539,7 @@ const sliders = () => {
     });
 
     document.addEventListener("click", (e) => {
+        if (performance.now() < ignoreClicksUntil) return;
         if (e.target.closest(".slider, .slider-toggle")) return;
         closeAll();
     });
@@ -637,7 +653,7 @@ const positionDragElements = () => {
         cardScale *= 0.9;
     };
 
-    gsap.to(".drag-element, .cluster-text", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
+    gsap.to(".drag-element, .cluster-text, .read-more", { opacity: 1, duration: 0.1, stagger: 0.01, ease: 'power2.out' });
 };
 
 // Text in the middle; each image (in random order) takes the closest free
@@ -660,7 +676,8 @@ const packCluster = (cluster) => {
     const text = cluster.querySelector(".cluster-text");
     if (text) boxes.set(text, boxAt(text, 0, 0));
 
-    const images = Array.from(cluster.querySelectorAll(".drag-element"));
+    // Images and the "Read more" button, in random order.
+    const images = Array.from(cluster.querySelectorAll(".drag-element, .read-more"));
     for (let i = images.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [images[i], images[j]] = [images[j], images[i]];

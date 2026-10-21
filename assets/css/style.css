@@ -237,8 +237,40 @@ h1 {
     box-shadow: none;
 }
 
-.drag-layout.is-zooming .cluster-text {
+.drag-layout.is-zooming .cluster-text,
+.drag-layout.is-zooming .read-more {
     text-shadow: none;
+}
+
+/* "Read more" button placed among a cluster's images; opens its side panel. */
+.read-more {
+    position: absolute;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: calc(0.75rem * var(--card-scale, 1));
+    line-height: 1.1;
+    color: var(--main-color);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    white-space: nowrap;
+    cursor: pointer;
+    opacity: 0; /* faded in with the images once placed */
+    text-shadow:
+        0 0 0.25em rgba(216, 26, 125, 0.2),
+        0 0 0.5em rgb(216, 26, 125, 0.5),
+        0 0 1em rgb(216, 26, 125, 0.7),
+        0 0 2em rgba(216, 26, 124, 0.8);
+    transition: text-shadow .25s ease-in-out;
+}
+
+.read-more:hover {
+    text-shadow:
+        0 0 0.25em rgba(216, 26, 125, 0.2),
+        0 0 0.5em rgb(216, 26, 125, 0.2),
+        0 0 1em rgb(216, 26, 125, 0.2),
+        0 0 2em rgba(216, 26, 125, 0.2);
 }
 
 /* Caption under the close-up image (2D and 3D); the script sets left/top to
