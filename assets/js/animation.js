@@ -1,10 +1,10 @@
 // The last click and the lines are kept in .drag-layout's own (unzoomed)
 // coordinates, so they zoom and pan with the images. The first click on an
-// image marks a dot; lines (and the guide to the pointer) start from there.
+// image marks where the trail starts (nothing is drawn); lines and the guide
+// to the pointer start from there.
 let startX = null; // last click; null until the first one
 let startY = null;
 let startCluster = null; // the .cluster of the last click
-let startDot = null; // where the trail begins: { x, y, cluster }
 
 let paths = [];
 
@@ -60,26 +60,6 @@ function draw() {
     const t = layoutTransform();
     clusterOpacity = new Map();
 
-    if (startDot && opacityOf(startDot.cluster) > 0) {
-        // Glowing pink dot where the trail starts, drawn like the 3D one: a
-        // quarter of an image's width across, solid in the middle and fading out.
-        const cardWidth = document.querySelector(".drag-element-wrapper")?.offsetWidth || 40;
-        const radius = (cardWidth * 0.25 * t.s) / 2;
-        const x = t.x + startDot.x * t.s;
-        const y = t.y + startDot.y * t.s;
-        const gradient = drawingContext.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, "rgba(216, 26, 125, 1)");
-        gradient.addColorStop(0.15, "rgba(216, 26, 125, 1)");
-        gradient.addColorStop(0.3, "rgba(216, 26, 125, 0.5)");
-        gradient.addColorStop(1, "rgba(216, 26, 125, 0)");
-        drawingContext.fillStyle = gradient;
-        drawingContext.globalAlpha = opacityOf(startDot.cluster);
-        drawingContext.beginPath();
-        drawingContext.arc(x, y, radius, 0, Math.PI * 2);
-        drawingContext.fill();
-        drawingContext.globalAlpha = 1;
-    };
-
     if (startX !== null && !document.body.classList.contains("stamp-mode")) {
         // The guide runs from the last stamp (layout coords) to the pointer
         // (canvas coords), so convert the pointer back into layout coords.
@@ -99,7 +79,6 @@ function windowResized() {
 
 function resetMap() {
     paths = [];
-    startDot = null;
     startX = startY = null;
     startCluster = null;
 };
@@ -117,8 +96,8 @@ function resetMap() {
 // };
 
 // Called by an image click (script.js) with the click position and the
-// image's .cluster: the first click marks the start dot, later ones draw a
-// line from the previous click.
+// image's .cluster: the first click marks where the trail starts, later ones
+// draw a line from the previous click.
 window.stampPoint = (clientX, clientY, cluster = null) => {
     const layout = document.querySelector(".drag-layout");
     const rect = layout.getBoundingClientRect();
@@ -126,11 +105,8 @@ window.stampPoint = (clientX, clientY, cluster = null) => {
     const x = (clientX - rect.left) / s;
     const y = (clientY - rect.top) / s;
 
-    if (startX === null) {
-        startDot = { x, y, cluster };
-    } else {
-        paths.push(new Path(startX, startY, x, y, startCluster, cluster));
-    }
+    // The first click draws nothing; it only marks where the trail starts.
+    if (startX !== null) paths.push(new Path(startX, startY, x, y, startCluster, cluster));
     startX = x;
     startY = y;
     startCluster = cluster;

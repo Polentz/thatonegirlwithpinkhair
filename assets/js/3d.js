@@ -1,6 +1,6 @@
 // 3D prototype: the home page clusters float in space as groups of image
 // cards. Drag empty space to orbit, wheel/pinch to zoom, right-drag to pan.
-// The first click on a card marks a glowing dot; each later click draws a pink
+// The first click on a card marks where the trail starts; each later click draws a pink
 // line from the previous click to that spot. A click also brings the card up close, captioned with its cluster's text; it floats back
 // on the next click, drag, zoom or Escape. Each cluster shows its text among
 // its images. Dragging on a card orbits, like empty space.
@@ -378,31 +378,6 @@ data.forEach((clusterData, i) => {
 const lineMaterial = new THREE.LineBasicMaterial({ color: PINK });
 let lastStamp = null; // where the last click landed; null until the first one
 
-// Glowing pink dot marking where the trail starts.
-const makeStartDot = (point) => {
-    const size = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    gradient.addColorStop(0, "rgba(216, 26, 125, 1)");
-    gradient.addColorStop(0.15, "rgba(216, 26, 125, 1)");
-    gradient.addColorStop(0.3, "rgba(216, 26, 125, 0.5)");
-    gradient.addColorStop(1, "rgba(216, 26, 125, 0)");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-
-    const dot = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: new THREE.CanvasTexture(canvas),
-        depthWrite: false,
-    }));
-    dot.position.copy(point);
-    dot.scale.setScalar(CARD_SIZE * 0.25);
-    return dot;
-};
-
-// The first click marks the start with a dot; later ones draw a line from the
-// previous click to `point`.
 // Each piece of the trail remembers the clusters its ends were clicked on and
 // shows at their lowest opacity (updateTrail), so it fades out and back in
 // with them when a filter hides or shows them.
@@ -416,11 +391,8 @@ const stamp = (point, cluster) => {
         line.material.transparent = true;
         scene.add(line);
         trail.push({ object: line, clusters: [lastStampCluster, cluster] });
-    } else {
-        const dot = makeStartDot(point);
-        scene.add(dot);
-        trail.push({ object: dot, clusters: [cluster] });
     }
+    // The first click draws nothing; it only marks where the trail starts.
     lastStamp = point.clone();
     lastStampCluster = cluster;
 };
