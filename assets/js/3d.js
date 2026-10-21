@@ -162,6 +162,7 @@ const makeTextLabel = (html) => {
 };
 
 const loader = new THREE.TextureLoader();
+const clusters = []; // { group, text, filters }
 const cards = [];   // card meshes, for picking
 const holders = []; // card + glow pairs and text labels, turned to face the camera every frame
 
@@ -172,17 +173,33 @@ data.forEach((clusterData, i) => {
     group.position.copy(clusterCentres[i]);
     scene.add(group);
 
-    const cluster = { group, text: clusterData.text };
+    const cluster = {
+        group,
+        text: clusterData.text,
+        filters: clusterData.filters || [],
+        shown: true,
+        opacity: 1,
+        anim: null,
+        cardMaterials: [], // solid normally, see-through only while fading
+        fadeMaterials: [], // always see-through (glow, text)
+    };
+    clusters.push(cluster);
+    group.userData.cluster = cluster;
 
     // The text sits at the cluster's centre; the cards keep clear of it.
     const taken = [];
     if (clusterData.text) {
         const label = makeTextLabel(clusterData.text);
+        cluster.fadeMaterials.push(label.material);
         group.add(label);
         holders.push(label); // faces the camera like the cards
         taken.push(new THREE.Vector3());
     }
     const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
+
+    // Own copy of the glow (same texture), so this cluster can fade alone.
+    const clusterGlow = glowMaterial.clone();
+    cluster.fadeMaterials.push(clusterGlow);
 
     clusterData.images.forEach((image, j) => {
         const width = image.ratio >= 1 ? CARD_SIZE : CARD_SIZE * image.ratio;
@@ -191,11 +208,10 @@ data.forEach((clusterData, i) => {
         const texture = loader.load(image.url);
         texture.colorSpace = THREE.SRGBColorSpace;
 
-        const card = new THREE.Mesh(
-            new THREE.PlaneGeometry(width, height),
-            new THREE.MeshBasicMaterial({ map: texture })
-        );
-        const glow = new THREE.Mesh(new THREE.PlaneGeometry(width * 2, height * 2), glowMaterial);
+        const cardMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        cluster.cardMaterials.push(cardMaterial);
+        const card = new THREE.Mesh(new THREE.PlaneGeometry(width, height), cardMaterial);
+        const glow = new THREE.Mesh(new THREE.PlaneGeometry(width * 2, height * 2), clusterGlow);
         glow.position.z = -0.01;
         glow.raycast = () => { }; // only the card itself is clickable
 
@@ -268,7 +284,9 @@ const aimAt = (e) => {
 
 const pickCard = (e) => {
     aimAt(e);
-    return raycaster.intersectObjects(cards, false)[0];
+    // Cards of clusters hidden by a filter can't be clicked.
+    return raycaster.intersectObjects(cards, false)
+        .find((hit) => hit.object.userData.cluster.shown);
 };
 
 let press = null;       // where the current press started, to tell a click from a drag
@@ -322,6 +340,59 @@ renderer.domElement.addEventListener("pointercancel", release);
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeUp(null);
 });
+
+// The nav's Filters menu (script.js): show only the clusters with the chosen
+// filter, or all of them for "All".
+// Hidden clusters fade out and shown ones fade in, one after another.
+const FILTER_FADE_MS = 350;
+const FILTER_STAGGER_MS = 50; // between one cluster starting and the next
+
+window.addEventListener("clusterfilter", (e) => {
+    const { filter } = e.detail;
+    const now = performance.now();
+    const changing = clusters.filter((cluster) =>
+        (!filter || cluster.filters.includes(filter)) !== cluster.shown
+    );
+    changing.forEach((cluster, i) => {
+        cluster.shown = !cluster.shown;
+        cluster.group.visible = true; // visible while it fades
+        cluster.anim = {
+            from: cluster.opacity,
+            to: cluster.shown ? 1 : 0,
+            start: now + (reduceMotion ? 0 : i * FILTER_STAGGER_MS),
+            duration: reduceMotion ? 0 : FILTER_FADE_MS,
+        };
+    });
+    if (closeUpHolder && !closeUpHolder.parent.userData.cluster?.shown) closeUp(null);
+});
+
+const setClusterOpacity = (cluster, opacity) => {
+    cluster.opacity = opacity;
+    cluster.fadeMaterials.forEach((material) => { material.opacity = opacity; });
+    cluster.cardMaterials.forEach((material) => {
+        material.opacity = opacity;
+        const seeThrough = opacity < 1;
+        if (material.transparent !== seeThrough) {
+            material.transparent = seeThrough;
+            material.needsUpdate = true;
+        }
+    });
+};
+
+const easeInOut = (t) => t * t * (3 - 2 * t);
+
+const updateFilterAnimations = (now) => {
+    clusters.forEach((cluster) => {
+        const { anim, group } = cluster;
+        if (!anim) return;
+        const t = anim.duration ? Math.min(1, Math.max(0, (now - anim.start) / anim.duration)) : 1;
+        setClusterOpacity(cluster, anim.from + (anim.to - anim.from) * easeInOut(t));
+        if (t === 1) {
+            cluster.anim = null;
+            group.visible = cluster.shown;
+        }
+    });
+};
 
 // --- Close-up: the clicked card floats in front of the camera -------------------
 
@@ -426,6 +497,7 @@ renderer.setAnimationLoop(() => {
     }
     controls.update();
     updateCloseUp();
+    updateFilterAnimations(performance.now());
     updateCaption();
 
     // Cards always face the viewer.

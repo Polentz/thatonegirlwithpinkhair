@@ -50,7 +50,6 @@ body.stamp-mode .logo img:hover {
     top: 0;
     left: 0;
     display: flex;
-    align-items: center;
     justify-content: space-between;
     font-size: 2rem;
     text-shadow:
@@ -68,7 +67,6 @@ h1 {
 
 .nav {
     display: flex;
-    align-items: center;
     justify-content: flex-end;
     gap: 2rem;
 }
@@ -90,6 +88,76 @@ h1 {
         0 0 10px rgb(216, 26, 125, 0.2),
         0 0 20px rgb(216, 26, 125, 0.2),
         0 0 40px rgba(216, 26, 125, 0.2);
+}
+
+.nav-filters {
+    position: relative;
+}
+
+.filters-list {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.filters-list[hidden] {
+    display: none;
+}
+
+.filter-option {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 2rem;
+    color: inherit;
+    text-shadow: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: text-shadow .25s ease-in-out;
+}
+
+.filter-option:hover {
+    text-shadow:
+        0 0 5px rgba(216, 26, 125, 0.2),
+        0 0 10px rgb(216, 26, 125, 0.2),
+        0 0 20px rgb(216, 26, 125, 0.2),
+        0 0 40px rgba(216, 26, 125, 0.2);
+}
+
+.filter-option.is-active {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+/* 2D clusters that don't match the chosen filter fade out, and fade back in
+   when they match again. --filter-delay (set by script.js) staggers them one
+   after another. */
+.cluster {
+    transition: opacity .45s ease-in-out var(--filter-delay, 0s);
+}
+
+.cluster.is-filtered-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity .45s ease-in-out var(--filter-delay, 0s),
+        visibility 0s linear calc(.45s + var(--filter-delay, 0s));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cluster,
+    .cluster.is-filtered-out {
+        transition: none;
+    }
 }
 
 .background {

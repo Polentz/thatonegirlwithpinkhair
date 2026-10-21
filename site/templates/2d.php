@@ -7,7 +7,7 @@
     <?php foreach ($page->clusters()->toStructure() as $cluster): ?>
         <?php if ($cluster->images()->toFiles()->isEmpty())
             continue ?>
-            <div class="cluster">
+            <div class="cluster" data-filters="<?= esc(json_encode($cluster->filters()->split()), 'attr') ?>">
             <?php if ($cluster->text()->isNotEmpty()): ?>
                 <p class="cluster-text"><?= $cluster->text() ?></p>
             <?php endif ?>

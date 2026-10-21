@@ -14,6 +14,7 @@ foreach (page('2d')->clusters()->toStructure() as $cluster) {
     $clusters[] = [
         'text' => $cluster->text()->value(),
         'images' => $images,
+        'filters' => $cluster->filters()->split(),
     ];
 }
 ?>

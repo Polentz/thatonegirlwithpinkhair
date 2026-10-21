@@ -529,6 +529,57 @@ const sliders = () => {
     });
 };
 
+// Filters menu in the nav: the label opens the list; choosing a filter keeps
+// only the clusters tagged with it ("All" shows every cluster). Clicking
+// outside or Escape closes the list. The choice is also announced as a
+// "clusterfilter" event, which the 3D page listens to.
+const filtersMenu = () => {
+    const toggle = document.querySelector(".filters-toggle");
+    const list = document.getElementById("filters-list");
+    if (!toggle || !list) return;
+
+    const setOpen = (open) => {
+        list.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+    };
+
+    toggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        setOpen(list.hidden);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".nav-filters")) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+    });
+
+    const options = list.querySelectorAll(".filter-option");
+    options.forEach((option) => {
+        option.addEventListener("click", () => {
+            const filter = option.dataset.filter; // "" for All
+            options.forEach((o) => o.classList.toggle("is-active", o === option));
+
+            // 2D: fade clusters out/in (in CSS), one after another.
+            const changing = Array.from(document.querySelectorAll(".cluster")).filter((cluster) => {
+                const filters = JSON.parse(cluster.dataset.filters || "[]");
+                const hide = !!filter && !filters.includes(filter);
+                return hide !== cluster.classList.contains("is-filtered-out");
+            });
+            changing.forEach((cluster, i) => {
+                cluster.style.setProperty("--filter-delay", `${i * 0.08}s`);
+                cluster.classList.toggle("is-filtered-out");
+            });
+            // Don't stay zoomed in on an image that just disappeared.
+            if (window.focusedImage?.()?.closest(".is-filtered-out")) window.unfocusImage();
+
+            window.dispatchEvent(new CustomEvent("clusterfilter", { detail: { filter } }));
+        });
+    });
+};
+
 // Clicking an image (not dragging) marks the trail (a dot first, then a line
 // from the previous click) and zooms in on it, captioned with its cluster's
 // text. Clicking it again or clicking empty space zooms back out.
@@ -719,6 +770,7 @@ window.addEventListener("load", () => {
     imageClicks();
     dashboardControls();
     sliders();
+    filtersMenu();
 });
 
 window.addEventListener("resize", () => {

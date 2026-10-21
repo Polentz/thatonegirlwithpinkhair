@@ -6,6 +6,10 @@ Howtotext: <p><strong>How to navigate the page</strong><br>Scroll to zoom, drag 
 
 ----
 
+Filterlist: Ai, New Filter
+
+----
+
 Clusters:
 
 - 
@@ -19,8 +23,9 @@ Clusters:
     - file://lt7entaxpakvjfdy
     - file://9hkq156actf6jyqj
     - file://1xniow7ucwfrvaec
-  category: ""
   text: "<p>you're not chic or whimsical, your internet vocabulary is stunted and you're infantilising yourself and buying too many things</p>"
+  filters: Ai
+  category: ""
 - 
   images:
     - file://prhkzav4wlxfxl8r
@@ -29,8 +34,9 @@ Clusters:
     - file://cp07yyxnqor6iufy
     - file://7i1mmvwseek8kcig
     - file://k1npshketjhna9un
-  category: ""
   text: Trad wives
+  filters: ""
+  category: ""
 - 
   images:
     - file://8plk3cvbujkjdscf
@@ -39,8 +45,9 @@ Clusters:
     - file://iitkgrgy8asspthj
     - file://9hkq156actf6jyqj
     - file://kdkvpyu6uk3j35vi
-  category: ""
   text: "I'm just a girl"
+  filters: ""
+  category: ""
 - 
   images:
     - file://3huz9yem6zd0tawy
@@ -49,8 +56,9 @@ Clusters:
     - file://viicdkuwdyo0vcob
     - file://2brzt5ujdguxvorz
     - file://dxfqwsk0qnt0iljq
-  category: ""
   text: Ai slop
+  filters: ""
+  category: ""
 - 
   images:
     - file://8ki5eypkwpopfgn7
@@ -59,8 +67,9 @@ Clusters:
     - file://iqlnwtfcuza81oxn
     - file://d0hxvfjtyg1onfqm
     - file://ux7yzkzgtximozng
-  category: ""
   text: Distrust in the feed
+  filters: ""
+  category: ""
 - 
   images:
     - file://we1svakxceiansic
@@ -69,8 +78,9 @@ Clusters:
     - file://odh7zsgzfnud3xk5
     - file://wdrylaaw7sfih3wl
     - file://xdc8pcc5kgfiufqh
-  category: ""
   text: Reaction pics
+  filters: ""
+  category: ""
 - 
   images:
     - file://nxefrvkapiraty4l
@@ -79,8 +89,9 @@ Clusters:
     - file://pinwgbut5ujuvo69
     - file://mbvnpq8mbtbfzklo
     - file://pz7u5wcucqel613u
-  category: ""
   text: Going analog
+  filters: ""
+  category: ""
 - 
   images:
     - file://rsc6hk1andm1ia1o
@@ -88,8 +99,9 @@ Clusters:
     - file://h3e0whww904t0yxm
     - file://rn9tmm6tuiank0fa
     - file://vbzg0r8vnzjtdffx
-  category: ""
   text: The algorithm is personalized
+  filters: ""
+  category: ""
 - 
   images:
     - file://30h8qrxc5kdolmth
@@ -97,8 +109,9 @@ Clusters:
     - file://w1e14vyawtnfsjcf
     - file://zr6izpnezxqsovqo
     - file://q1wgrgzpyljoddbp
-  category: ""
   text: Cottagecore
+  filters: ""
+  category: ""
 - 
   images:
     - file://uvke7ifxytsn3wwe
@@ -106,8 +119,9 @@ Clusters:
     - file://0nnkc7fc0xqafvdy
     - file://828h8rwlp8a2l9x1
     - file://cgn6i4iipuc3x21r
-  category: ""
   text: A life online is a life performed
+  filters: ""
+  category: ""
 
 ----
 
