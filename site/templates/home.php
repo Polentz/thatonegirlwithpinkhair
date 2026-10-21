@@ -3,7 +3,7 @@
 // are numbered in order; the number names each "Read more" panel, as on 2D.
 $clusters = [];
 $readMorePanels = []; // panel id => [title, text]
-foreach (page('2d')->clusters()->toStructure() as $cluster) {
+foreach ($page->clusters()->toStructure() as $cluster) {
     $images = [];
     foreach ($cluster->images()->toFiles() as $file) {
         $images[] = [
@@ -16,10 +16,10 @@ foreach (page('2d')->clusters()->toStructure() as $cluster) {
     $readMoreId = null;
     if ($cluster->readMore()->isNotEmpty()) {
         $readMoreId = 'read-more-' . (count($clusters) + 1);
-        $readMorePanels[$readMoreId] = [$cluster->text(), $cluster->readMore()];
+        $readMorePanels[$readMoreId] = [$cluster->title(), $cluster->readMore()];
     }
     $clusters[] = [
-        'text' => $cluster->text()->value(),
+        'text' => $cluster->title()->value(),
         'images' => $images,
         'filters' => $cluster->filters()->split(),
         'readMore' => $readMoreId,

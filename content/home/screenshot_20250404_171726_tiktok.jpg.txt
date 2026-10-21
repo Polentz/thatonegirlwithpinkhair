@@ -1,0 +1,5 @@
+Uuid: wdrylaaw7sfih3wl
+
+----
+
+Template: image

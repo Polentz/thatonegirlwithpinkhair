@@ -1,0 +1,5 @@
+Uuid: we1svakxceiansic
+
+----
+
+Template: image

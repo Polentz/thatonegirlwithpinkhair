@@ -1,0 +1,5 @@
+Uuid: p80agq19eeurd12b
+
+----
+
+Template: image
