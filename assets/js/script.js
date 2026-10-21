@@ -322,7 +322,8 @@ const dashboardControls = () => {
         });
     };
 
-    window.focusImage = (element, html) => {
+    // `size` overrides CLOSE_UP_SIZE (the cluster text uses a smaller one).
+    window.focusImage = (element, html, size = CLOSE_UP_SIZE) => {
         if (!focused) {
             savedView = { s: gsap.getProperty(layout, "scaleX") || 1, x: panX, y: panY };
         } else {
@@ -344,7 +345,7 @@ const dashboardControls = () => {
 
         const width = element.offsetWidth;
         const height = element.offsetHeight;
-        const s = CLOSE_UP_SIZE * Math.min(window.innerHeight / height, window.innerWidth / width);
+        const s = size * Math.min(window.innerHeight / height, window.innerWidth / width);
         animateView(s, window.innerWidth / 2 - originX - dx * s, window.innerHeight / 2 - originY - dy * s);
 
         // Caption under where the image will end up; fades in as it arrives.
@@ -616,8 +617,28 @@ const imageClicks = () => {
             if (document.body.classList.contains("stamp-mode")) return; // logo stamping instead
             if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged
             if (window.focusedImage?.() === element) return window.unfocusImage();
-            window.stampPoint?.(e.clientX, e.clientY);
+            window.stampPoint?.(e.clientX, e.clientY, element.closest(".cluster"));
             window.focusImage?.(element, text);
+        });
+    });
+
+    // The cluster text (with its "Read more") comes up close the same way, a
+    // bit smaller and without a caption, since it is the text. "Read more"
+    // itself still just opens its panel.
+    const TEXT_CLOSE_UP_SIZE = 0.3;
+    document.querySelectorAll(".cluster-label").forEach((label) => {
+        let downX = 0, downY = 0;
+        label.addEventListener("pointerdown", (e) => {
+            downX = e.clientX;
+            downY = e.clientY;
+        });
+
+        label.addEventListener("click", (e) => {
+            if (e.target.closest(".read-more")) return;
+            if (document.body.classList.contains("stamp-mode")) return;
+            if (Math.hypot(e.clientX - downX, e.clientY - downY) > DRAG_SLOP) return; // dragged
+            if (window.focusedImage?.() === label) return window.unfocusImage();
+            window.focusImage?.(label, "", TEXT_CLOSE_UP_SIZE); // no trail: only image clicks draw
         });
     });
 
@@ -629,7 +650,7 @@ const imageClicks = () => {
     }, true);
 
     document.addEventListener("click", (e) => {
-        if (e.target.closest(".drag-element-wrapper, .slider, .header, .footer")) return;
+        if (e.target.closest(".drag-element-wrapper, .cluster-label, .slider, .header, .footer")) return;
         if (Math.hypot(e.clientX - pressX, e.clientY - pressY) > DRAG_SLOP) return;
         window.unfocusImage?.();
     });

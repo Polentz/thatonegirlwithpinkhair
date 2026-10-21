@@ -222,8 +222,7 @@ h1 {
     align-items: center;
     gap: 0.25em;
     font-size: calc(0.75rem * var(--card-scale, 1));
-    pointer-events: none;
-    /* only the button inside is clickable */
+    cursor: pointer; /* clicking it brings it up close, like an image */
 }
 
 .cluster-text {
@@ -262,7 +261,7 @@ h1 {
     border-radius: 2rem;
     background: var(--white-color);
     font: inherit;
-    font-size: calc(0.75rem * var(--card-scale, 1));
+    font-size: calc(0.6rem * var(--card-scale, 1));
     line-height: 1;
     color: var(--main-color);
     white-space: nowrap;

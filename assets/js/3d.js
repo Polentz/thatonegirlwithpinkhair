@@ -18,6 +18,7 @@ const TEXT_LINE_HEIGHT = CARD_SIZE * 0.1; // height of one line of cluster text
 const TEXT_MAX_WIDTH = CARD_SIZE * 2;      // cluster text wraps beyond this width
 const CLOSE_UP_DISTANCE = 6;    // how far in front of the camera a clicked card floats
 const CLOSE_UP_SIZE = 0.6;      // share of the screen the close-up card fills
+const TEXT_CLOSE_UP_SIZE = 0.3; // same for a cluster's text (+ "Read more") brought close
 const DRAG_SLOP = 5;            // px of movement that counts as a drag, not a click 5
 
 const container = document.querySelector(".universe");
@@ -162,6 +163,7 @@ const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT } 
     );
     label.raycast = () => { }; // not clickable
     label.userData.textHeight = lines.length * worldLineHeight; // without the glow padding
+    label.userData.textWidth = textWidth / pxPerUnit;
     return label;
 };
 
@@ -170,12 +172,12 @@ const makeTextLabel = (html, { lineHeight: worldLineHeight = TEXT_LINE_HEIGHT } 
 // white text and a softer glow. Both looks are drawn once and crossfaded.
 // Sizes follow the CSS in em: text the size of the cluster text, padding
 // 2/3em × 4/3em (.5rem 1rem at 12px), border 1/12em (1px), line-height 1.
-const READ_MORE_FONT = TEXT_LINE_HEIGHT / 1.2; // the cluster text's font size, in world units
+const READ_MORE_FONT = (TEXT_LINE_HEIGHT / 1.2) * 0.8; // 0.8 × the cluster text's size, like 0.6rem vs 0.75rem in 2D
 
 const makeReadMoreButton = (text) => {
-    const fontSize = 64; // canvas px per em
+    const fontSize = 20; // canvas px per em
     const pxPerUnit = fontSize / READ_MORE_FONT;
-    const glowScale = fontSize / 20; // the site's glow is sized for ~20px text
+    const glowScale = fontSize / 10; // the site's glow is sized for ~20px text
     const font = `${fontSize}px Helvetica, Arial, sans-serif`;
     const pink = "rgb(216, 26, 125)";
 
@@ -317,6 +319,29 @@ data.forEach((clusterData, i) => {
         }
     }
 
+    // Clicking the text brings it (with its "Read more") up close like a
+    // card: it gets the same home/size data the close-up code uses, and no
+    // caption text, since it is the text.
+    if (label) {
+        const button = label.children.find((child) => child.userData.hitArea);
+        const blockHeight = label.userData.textHeight + (button ? 2 * Math.abs(button.position.y) : 0);
+        Object.assign(label.userData, {
+            home: new THREE.Vector3(),
+            width: label.userData.textWidth,
+            height: blockHeight,
+            text: "",
+            closeUpSize: TEXT_CLOSE_UP_SIZE,
+        });
+
+        const hitArea = new THREE.Mesh(
+            new THREE.PlaneGeometry(label.userData.textWidth, label.userData.textHeight),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        hitArea.userData = { cluster, holder: label };
+        label.add(hitArea);
+        clickables.push(hitArea);
+    }
+
     // Own copy of the glow (same texture), so this cluster can fade alone.
     const clusterGlow = glowMaterial.clone();
     cluster.fadeMaterials.push(clusterGlow);
@@ -378,14 +403,34 @@ const makeStartDot = (point) => {
 
 // The first click marks the start with a dot; later ones draw a line from the
 // previous click to `point`.
-const stamp = (point) => {
+// Each piece of the trail remembers the clusters its ends were clicked on and
+// shows at their lowest opacity (updateTrail), so it fades out and back in
+// with them when a filter hides or shows them.
+const trail = []; // { object, clusters }
+let lastStampCluster = null;
+
+const stamp = (point, cluster) => {
     if (lastStamp) {
         const geometry = new THREE.BufferGeometry().setFromPoints([lastStamp.clone(), point.clone()]);
-        scene.add(new THREE.Line(geometry, lineMaterial));
+        const line = new THREE.Line(geometry, lineMaterial.clone());
+        line.material.transparent = true;
+        scene.add(line);
+        trail.push({ object: line, clusters: [lastStampCluster, cluster] });
     } else {
-        scene.add(makeStartDot(point));
+        const dot = makeStartDot(point);
+        scene.add(dot);
+        trail.push({ object: dot, clusters: [cluster] });
     }
     lastStamp = point.clone();
+    lastStampCluster = cluster;
+};
+
+const updateTrail = () => {
+    trail.forEach(({ object, clusters }) => {
+        const opacity = Math.min(...clusters.map((cluster) => cluster.opacity));
+        object.material.opacity = opacity;
+        object.visible = opacity > 0;
+    });
 };
 
 // --- Pointer: click a card to stamp ---------------------------------------------
@@ -456,7 +501,7 @@ const release = (e) => {
     const { cluster, holder } = hit.object.userData;
     if (holder === closeUpHolder) return closeUp(null); // clicking it again sends it back
 
-    stamp(hit.point);
+    if (!holder.userData.closeUpSize) stamp(hit.point, cluster); // only image clicks draw the trail, not the text
     focusTarget = cluster.group.position.clone(); // turn the view towards it
     closeUp(holder);
 };
@@ -593,7 +638,8 @@ const updateCloseUp = () => {
 
             const viewHeight = 2 * CLOSE_UP_DISTANCE * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
             const viewWidth = viewHeight * camera.aspect;
-            const scale = CLOSE_UP_SIZE * Math.min(viewHeight / height, viewWidth / width);
+            const size = holder.userData.closeUpSize ?? CLOSE_UP_SIZE;
+            const scale = size * Math.min(viewHeight / height, viewWidth / width);
 
             holder.position.lerp(closeUpSpot, ease);
             holder.scale.lerp(targetScale.setScalar(scale), ease);
@@ -639,6 +685,7 @@ renderer.setAnimationLoop(() => {
     updateCloseUp();
     updateFilterAnimations(performance.now());
     updateReadMoreButtons();
+    updateTrail();
     updateCaption();
 
     // Cards always face the viewer.
