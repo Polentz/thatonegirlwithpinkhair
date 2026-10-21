@@ -1,16 +1,16 @@
-/* 3D prototype page. Loaded automatically for the universe template. */
-
 .universe {
     position: fixed;
     inset: 0;
     z-index: 1;
     overflow: hidden;
+    cursor: -webkit-grab;
     cursor: grab;
+    -ms-touch-action: none;
     touch-action: none;
-    /* the 3D controls handle touch */
 }
 
 .universe.is-grabbing {
+    cursor: -webkit-grabbing;
     cursor: grabbing;
 }
 
@@ -22,15 +22,12 @@
     display: block;
 }
 
-/* The close-up canvas sits on top of the main WebGL canvas but lets every
-   pointer event through to it. */
 .universe .closeup-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
 
-/* Readable by screen readers and search engines, hidden on screen. */
 .universe-fallback {
     position: absolute;
     width: 1px;
