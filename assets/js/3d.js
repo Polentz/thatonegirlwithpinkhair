@@ -346,6 +346,7 @@ const closeUp = (holder) => {
 };
 
 const captionAnchor = new THREE.Vector3();
+const captionCorner = new THREE.Vector3();
 
 const updateCaption = () => {
     if (!closeUpHolder) return; // keeps its last spot while fading out
@@ -354,6 +355,13 @@ const updateCaption = () => {
     captionAnchor.project(camera);
     caption.style.left = `${(captionAnchor.x + 1) / 2 * window.innerWidth}px`;
     caption.style.top = `${(1 - captionAnchor.y) / 2 * window.innerHeight}px`;
+
+    // No wider than the image: twice the on-screen distance from its
+    // bottom-centre to its bottom-right corner.
+    const { width, height } = closeUpHolder.userData;
+    closeUpHolder.localToWorld(captionCorner.set(width / 2, -height / 2, 0));
+    captionCorner.project(camera);
+    caption.style.maxWidth = `${(captionCorner.x - captionAnchor.x) * window.innerWidth}px`;
 };
 
 const closeUpSpot = new THREE.Vector3();

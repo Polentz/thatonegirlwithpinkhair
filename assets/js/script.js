@@ -351,6 +351,7 @@ const dashboardControls = () => {
         caption.innerHTML = html ? `<p>${html}</p>` : "";
         caption.style.left = `${window.innerWidth / 2}px`;
         caption.style.top = `${window.innerHeight / 2 + (height * s) / 2}px`;
+        caption.style.maxWidth = `${width * s}px`; // no wider than the image
         caption.style.transitionDelay = `${CLOSE_UP_DURATION * 0.6}s`;
         caption.classList.toggle("is-visible", !!html);
     };
@@ -370,6 +371,7 @@ const dashboardControls = () => {
         const r = focused.getBoundingClientRect();
         caption.style.left = `${r.left + r.width / 2}px`;
         caption.style.top = `${r.bottom}px`;
+        caption.style.maxWidth = `${r.width}px`;
     };
 
     window.unfocusImage = unfocus;
