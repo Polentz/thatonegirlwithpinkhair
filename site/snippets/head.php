@@ -19,7 +19,8 @@
     <?php if ($ogImage = $site->logo()->toFile()): ?>
         <meta property="og:image" content="<?= $ogImage->url() ?>">
     <?php endif ?>
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"> -->
     <?php if ($favicon = $site->logo()->toFile()): ?>
         <link href="<?= $favicon->url() ?>" rel="shortcut icon" type="image/x-icon">
         <link href="<?= $favicon->url() ?>" rel="apple-touch-icon">
