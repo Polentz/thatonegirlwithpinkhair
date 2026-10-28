@@ -37,7 +37,7 @@ columns:
             type: html
             value: "{{ page.panelThumbs }}"
             width: 1/2
-        help: Each cluster is a group of images with its text. Drag to reorder; hidden clusters are not shown on the site.
+        help: Each cluster is a group of images with its text. Hidden clusters are not shown on the website.
   sidebar:
     width: 1/3
     sections:
