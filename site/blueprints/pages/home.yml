@@ -23,6 +23,9 @@ columns:
         type: pages
         template: cluster
         status: all
+        batch: true
+        search: true
+        sortable: false
         layout: table
         sortable: true
         image: false

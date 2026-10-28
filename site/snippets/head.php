@@ -16,12 +16,12 @@
     <meta property="og:description" content="<?= $site->description() ?>">
     <meta property="og:url" content="<?= $page->url() ?>">
     <meta property="og:site_name" content="<?= $site->title() ?>">
-    <?php if ($ogImage = $site->logo()->toFile()): ?>
+    <?php if ($ogImage = $site->ogImage()->toFile()): ?>
         <meta property="og:image" content="<?= $ogImage->url() ?>">
     <?php endif ?>
     <meta name="robots" content="noindex,nofollow">
     <!-- <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"> -->
-    <?php if ($favicon = $site->logo()->toFile()): ?>
+    <?php if ($favicon = $site->favicon()->toFile()): ?>
         <link href="<?= $favicon->url() ?>" rel="shortcut icon" type="image/x-icon">
         <link href="<?= $favicon->url() ?>" rel="apple-touch-icon">
     <?php endif ?>

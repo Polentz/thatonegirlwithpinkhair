@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'debug' => true,
+    'debug' => false,
     'panel' => [
         'css' => 'assets/css/panel.css'
     ],

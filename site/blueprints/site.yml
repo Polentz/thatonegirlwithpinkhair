@@ -59,4 +59,25 @@ columns:
               it: Parole chiave  
             type: tags
             separator: ','
-
+          ogImage:
+            label: Social Sharing Image
+            type: files
+            multiple: false
+            query: site.images
+            uploads: image
+            image:
+              cover: true
+              ratio: 1200/630
+              back: white
+            help: Shown when the site is shared on social media or in chats. Best at 1200 × 630 px (JPG or PNG).
+          favicon:
+            label: Favicon
+            type: files
+            multiple: false
+            query: site.images
+            uploads: image
+            image:
+              cover: false
+              ratio: 1/1
+              back: white
+            help: Shown in browser tabs and as the home screen icon on phones. Use a square image, at least 180 × 180 px (PNG recommended).

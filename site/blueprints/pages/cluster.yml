@@ -1,8 +1,5 @@
 title: Cluster
 
-# Each cluster is a subpage of Home: its own folder holds its text and images.
-# Clusters have no page of their own on the site; their URL redirects to Home.
-
 num: default
 
 status:
