@@ -1,5 +1,0 @@
-Uuid: zmtot1nbaghsjews
-
-----
-
-Template: image

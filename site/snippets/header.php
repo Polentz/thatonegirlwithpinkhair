@@ -1,3 +1,19 @@
+<?php
+
+$filters = [];
+$clustersPage = $page;
+$shownClusters = $page->children()->listed()->template('cluster')
+    ->filter(fn($c) => $c->images()->isNotEmpty());
+
+if ($clustersPage) {
+    $used = [];
+    foreach ($shownClusters as $cluster) {
+        $used = array_merge($used, $cluster->filters()->split());
+    }
+    $filters = array_values(array_intersect($clustersPage->filterList()->split(), $used));
+}
+?>
+
 <header class="header">
     <h1>You're logged in as that one girl with pink hair</h1>
     <nav class="nav">
@@ -9,20 +25,6 @@
             <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider"
                 aria-expanded="false">Follow</a>
         <?php endif ?>
-        <?php
-        // Only filters that a shown cluster (one with images) actually uses,
-        // in the order of the Filters list.
-        $filters = [];
-        if ($clustersPage = page('2d')) {
-            $used = [];
-            foreach ($clustersPage->clusters()->toStructure() as $cluster) {
-                if ($cluster->images()->toFiles()->isNotEmpty()) {
-                    $used = array_merge($used, $cluster->filters()->split());
-                }
-            }
-            $filters = array_values(array_intersect($clustersPage->filterList()->split(), $used));
-        }
-        ?>
         <?php if (!empty($filters)): ?>
             <div class="nav-filters">
                 <a class="nav-label filters-toggle" href="#filters-list" aria-controls="filters-list"

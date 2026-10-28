@@ -1,5 +1,0 @@
-Uuid: 828h8rwlp8a2l9x1
-
-----
-
-Template: image

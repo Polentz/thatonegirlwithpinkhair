@@ -1,5 +1,0 @@
-Uuid: nxefrvkapiraty4l
-
-----
-
-Template: image

@@ -1,0 +1,9 @@
+Uuid: 1xniow7ucwfrvaec
+
+----
+
+Template: image
+
+----
+
+Sort: 9

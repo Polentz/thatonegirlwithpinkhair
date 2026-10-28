@@ -1,5 +1,0 @@
-Uuid: tlvgi2ioipwwjuqc
-
-----
-
-Template: image

@@ -1,5 +1,0 @@
-Uuid: emm7alehpk0dsfls
-
-----
-
-Template: image

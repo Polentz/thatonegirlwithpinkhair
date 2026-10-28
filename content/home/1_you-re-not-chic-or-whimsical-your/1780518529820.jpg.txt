@@ -1,0 +1,9 @@
+Uuid: pvgvaxd1qod0u5dh
+
+----
+
+Template: image
+
+----
+
+Sort: 6

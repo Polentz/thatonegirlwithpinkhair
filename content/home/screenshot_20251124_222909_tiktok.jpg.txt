@@ -1,5 +1,0 @@
-Uuid: 8plk3cvbujkjdscf
-
-----
-
-Template: image

@@ -1,10 +1,10 @@
-title: 3D prototype
+title: Home
 
 options: 
   changeSlug: false
   changeStatus: true
   changeTemplate: false
-  cheangeTitle: true
+  changeTitle: true
   create: false
   delete: false
   duplicate: false
@@ -18,53 +18,19 @@ columns:
   main:
     width: 2/3
     sections:
-      content:
-        type: fields
-        fields:
-          clusters:
-            label: Clusters
-            type: structure
-            help: Each cluster is a group of images with its text.
-            columns:
-              filters:
-                width: 1/4
-              title:
-                width: 1/4
-              images:
-                width: 1/2
-            fields:
-              filters:
-                label: Filters
-                type: select
-                options:
-                  type: query
-                  query: page.filterList.split
-              title:
-                label: Title
-                type: text
-              images:
-                label: Images
-                type: files
-                template: image
-                uploads: image
-                multiple: true
-                image:
-                  icon: true
-                  ratio: 4/3
-                  back: white
-                  cover: true
-              readMore:
-                label: Read more
-                type: writer
-                help: Optional. When filled, a "Read more" button appears among the cluster's images and opens this text in a side panel.
-                marks:
-                  - bold
-                  - italic
-                  - underline
-                  - strike
-                  - link
-                  - email
-                  - clear
+      clusters:
+        label: Clusters
+        type: pages
+        template: cluster
+        status: all
+        layout: list
+        sortable: true
+        image:
+          query: page.images.sorted.first
+          ratio: 4/3
+          back: white
+          cover: true
+        help: Each cluster is a group of images with its text. Drag to reorder; hidden clusters are not shown on the site.
   sidebar:
     width: 1/3
     sections:
@@ -82,8 +48,10 @@ columns:
               - link
               - email
               - clear
-            nodes: false
+            nodes:
+              - bulletList
+              - orderedList
           filterList:
             label: Filters
             type: tags
-            help: The filters visitors can choose from. Assign them to each cluster below; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.
+            help: The filters visitors can choose from. Assign them in each cluster; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.

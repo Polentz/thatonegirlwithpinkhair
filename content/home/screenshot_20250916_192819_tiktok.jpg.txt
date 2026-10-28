@@ -1,5 +1,0 @@
-Uuid: viicdkuwdyo0vcob
-
-----
-
-Template: image

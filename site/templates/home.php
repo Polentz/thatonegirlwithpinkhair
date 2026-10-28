@@ -1,11 +1,12 @@
 <?php
-// Same clusters as the 2D page, handed to 3d.js as JSON. Clusters with images
-// are numbered in order; the number names each "Read more" panel, as on 2D.
+// Clusters are Home's listed subpages, in panel order, handed to 3d.js as JSON.
+// Clusters with images are numbered in order; the number names each
+// "Read more" panel, as on 2D.
 $clusters = [];
 $readMorePanels = []; // panel id => [title, text]
-foreach ($page->clusters()->toStructure() as $cluster) {
+foreach ($page->children()->listed()->template('cluster') as $cluster) {
     $images = [];
-    foreach ($cluster->images()->toFiles() as $file) {
+    foreach ($cluster->images()->sorted() as $file) {
         $images[] = [
             'url' => $file->resize(600)->url(),
             'ratio' => $file->ratio() ?: 1, // width / height

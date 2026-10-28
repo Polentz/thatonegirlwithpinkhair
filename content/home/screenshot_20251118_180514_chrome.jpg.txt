@@ -1,5 +1,0 @@
-Uuid: pinwgbut5ujuvo69
-
-----
-
-Template: image

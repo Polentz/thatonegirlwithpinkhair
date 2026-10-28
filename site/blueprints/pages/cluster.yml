@@ -1,0 +1,62 @@
+title: Cluster
+
+# Each cluster is a subpage of Home: its own folder holds its text and images.
+# Clusters have no page of their own on the site; their URL redirects to Home.
+
+num: default
+
+status:
+  draft:
+    label: Hidden
+    text: Not shown on the site.
+  listed:
+    label: Shown
+    text: Shown on the site, in the order of the clusters list.
+
+options:
+  changeTemplate: false
+  preview: "{{ page.parent.url }}"
+
+columns:
+  main:
+    width: 2/3
+    sections:
+      images:
+        label: Images
+        type: files
+        template: image
+        layout: cards
+        size: small
+        image:
+          ratio: 4/3
+          back: white
+          cover: true
+        help: A cluster without images is not shown on the site.
+  sidebar:
+    width: 1/3
+    sections:
+      content:
+        type: fields
+        fields:
+          filters:
+            label: Filters
+            type: select
+            options:
+              type: query
+              query: page.parent.filterList.split
+            help: Pick from the filters listed on Home.
+          readMore:
+            label: Read more
+            type: writer
+            help: Optional. When filled, a "Read more" button appears among the cluster's images and opens this text in a side panel.
+            marks:
+              - bold
+              - italic
+              - underline
+              - strike
+              - link
+              - email
+              - clear
+            nodes:
+              - bulletList
+              - orderedList

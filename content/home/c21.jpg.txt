@@ -1,5 +1,0 @@
-Uuid: lt7entaxpakvjfdy
-
-----
-
-Template: image

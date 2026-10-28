@@ -1,0 +1,9 @@
+Uuid: iitkgrgy8asspthj
+
+----
+
+Template: image
+
+----
+
+Sort: 4

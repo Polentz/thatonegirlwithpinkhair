@@ -1,0 +1,9 @@
+Uuid: lt7entaxpakvjfdy
+
+----
+
+Template: image
+
+----
+
+Sort: 7

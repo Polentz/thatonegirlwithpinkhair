@@ -1,5 +1,0 @@
-Uuid: iitkgrgy8asspthj
-
-----
-
-Template: image

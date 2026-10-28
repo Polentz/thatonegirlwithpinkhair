@@ -1,0 +1,9 @@
+Uuid: viicdkuwdyo0vcob
+
+----
+
+Template: image
+
+----
+
+Sort: 4
