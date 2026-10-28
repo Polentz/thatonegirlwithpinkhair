@@ -23,13 +23,20 @@ columns:
         type: pages
         template: cluster
         status: all
-        layout: list
+        layout: table
         sortable: true
-        image:
-          query: page.images.sorted.first
-          ratio: 4/3
-          back: white
-          cover: true
+        image: false
+        columns:
+          title:
+            width: 1/4
+          filters:
+            label: Filters
+            width: 1/4
+          images:
+            label: Images
+            type: html
+            value: "{{ page.panelThumbs }}"
+            width: 1/2
         help: Each cluster is a group of images with its text. Drag to reorder; hidden clusters are not shown on the site.
   sidebar:
     width: 1/3

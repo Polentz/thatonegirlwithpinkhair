@@ -1,3 +1,18 @@
 .k-table .k-files-field-preview .k-tag-text {
     display: none;
 }
+
+/* Clusters table on Home: a row of thumbnails per cluster */
+.k-table .cluster-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.k-table .cluster-thumbs img {
+    width: 32px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 2px;
+    margin: 0;
+}
