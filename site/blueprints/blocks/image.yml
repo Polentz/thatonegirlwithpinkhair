@@ -7,6 +7,7 @@ fields:
     type: files
     query: model.images
     multiple: false
+    link: false
     image:
       back: black
     uploads:
@@ -14,6 +15,7 @@ fields:
   alt:
     label: field.blocks.image.alt
     type: text
+    help: Alternative text, or alt text, is a short written description of an image that helps people who use screen readers understand its content and function when the image cannot be seen.
     icon: title
   caption:
     label: field.blocks.image.caption

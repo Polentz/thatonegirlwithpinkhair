@@ -1,17 +1,18 @@
 <?php
 
+use Kirby\Cms\Files;
 use Kirby\Cms\Page;
 
 class ClusterPage extends Page
 {
-    /**
-     * Small thumbnails of the cluster's images, in order, for the
-     * Images column of the clusters table on Home in the panel.
-     */
+    public function gallery(): Files
+    {
+        return $this->content()->get('gallery')->toFiles();
+    }
     public function panelThumbs(): string
     {
         $html = '';
-        foreach ($this->images()->sorted() as $file) {
+        foreach ($this->gallery() as $file) {
             $thumb = $file->thumb(['width' => 96, 'height' => 72, 'crop' => true]);
             $html .= '<img src="' . esc($thumb->url()) . '" alt="">';
         }

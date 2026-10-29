@@ -1,0 +1,9 @@
+title: Illustration
+accept:
+  extension: svg, jpg, jpeg, png, webp
+focus: false
+fields:
+  alt:
+    label: Alternative text
+    type: text
+    help: Alternative text, or alt text, is a short written description of an image that helps people who use screen readers understand its content and function when the image cannot be seen.

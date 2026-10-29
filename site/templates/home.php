@@ -3,7 +3,7 @@ $clusters = [];
 $readMorePanels = []; // panel id => [title, text]
 foreach ($page->children()->listed()->template('cluster') as $cluster) {
     $images = [];
-    foreach ($cluster->images()->sorted() as $file) {
+    foreach ($cluster->gallery() as $file) {
         $images[] = [
             'url' => $file->resize(600)->url(),
             'ratio' => $file->ratio() ?: 1, // width / height

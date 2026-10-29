@@ -7,6 +7,9 @@ $crop = $block->crop()->isTrue();
 $link = $block->link();
 $ratio = $block->ratio()->or('auto');
 $image = $block->image()->toFile();
+if (!$image) {
+    return;
+}
 $alt = $alt->or($image->alt());
 $src = $image->url();
 

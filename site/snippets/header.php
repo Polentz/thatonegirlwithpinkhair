@@ -3,7 +3,7 @@
 $filters = [];
 $clustersPage = $page;
 $shownClusters = $page->children()->listed()->template('cluster')
-    ->filter(fn($c) => $c->images()->isNotEmpty());
+    ->filter(fn($c) => $c->gallery()->isNotEmpty());
 
 if ($clustersPage) {
     $used = [];

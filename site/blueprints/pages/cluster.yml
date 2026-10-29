@@ -18,17 +18,21 @@ columns:
   main:
     width: 2/3
     sections:
-      images:
+      cluster:
         label: Images
-        type: files
-        template: image
-        layout: cards
-        size: small
-        image:
-          ratio: 4/3
-          back: white
-          cover: true
-        help: A cluster without images is not shown on the site.
+        type: fields
+        fields:
+          gallery:
+            type: files
+            template: image
+            layout: cards
+            size: small
+            limit: 100
+            link: false
+            image:
+              ratio: 4/3
+              back: white
+              cover: true
   sidebar:
     width: 1/3
     sections:
