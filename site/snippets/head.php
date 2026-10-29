@@ -39,6 +39,7 @@
         <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
         <?= js([
             'assets/js/script.js',
+            'assets/js/2d.js',
             'assets/js/animation.js',
             '@auto',
         ]) ?>

@@ -95,7 +95,7 @@ function resetMap() {
 //     startY = newEndY;
 // };
 
-// Called by an image click (script.js) with the click position and the
+// Called by an image click (2d.js) with the click position and the
 // image's .cluster: the first click marks where the trail starts, later ones
 // draw a line from the previous click.
 window.stampPoint = (clientX, clientY, cluster = null) => {
