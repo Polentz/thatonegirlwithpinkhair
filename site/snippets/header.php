@@ -32,9 +32,15 @@ if ($clustersPage) {
                     aria-expanded="false"><?= $site->filtersLabel() ?><span class="filters-count" hidden>*</span></a>
                 <ul class="filters-list" id="filters-list" hidden>
                     <?php foreach ($filters as $key => $name): ?>
-                        <li><button class="filter-option" type="button" data-filter="<?= esc($key, 'attr') ?>">
+                        <li class="filter-option-wrapper">
+                            <button class="filter-option" type="button" data-filter="<?= esc($key, 'attr') ?>">
                                 <?= esc($name) ?>
-                            </button></li>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <line x1="4" y1="4" x2="20" y2="20" />
+                                    <line x1="20" y1="4" x2="4" y2="20" />
+                                </svg>
+                            </button>
+                        </li>
                     <?php endforeach ?>
                 </ul>
             </div>

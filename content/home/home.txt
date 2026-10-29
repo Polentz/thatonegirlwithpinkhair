@@ -9,7 +9,7 @@ Howtotext: <p><strong>How to navigate the page</strong><br>Drag to turn the univ
 Filterlist:
 
 - 
-  name: filter 1
+  name: filter with a full name
   key: ethg2e07
 - 
   name: filter 2
