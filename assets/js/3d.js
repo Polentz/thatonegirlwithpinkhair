@@ -466,7 +466,7 @@ const release = (e) => {
     const { cluster, holder } = hit.object.userData;
     if (holder === closeUpHolder) return closeUp(null); // clicking it again sends it back
 
-    if (!holder.userData.closeUpSize) stamp(hit.point, cluster); // only image clicks draw the trail, not the text
+    stamp(hit.point, cluster); // image and text clicks both draw the trail
     focusTarget = cluster.group.position.clone(); // turn the view towards it
     closeUp(holder);
 };
