@@ -119,8 +119,9 @@ h1 {
 
 .filter-option {
     display: flex;
-    align-items: flex-start;
-    gap: 0.25rem;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 1rem;
     padding: 0;
     border: none;
     background: none;
@@ -135,10 +136,10 @@ h1 {
 }
 
 .filter-option svg {
-    width: 0.55rem;
-    height: 0.55rem;
+    width: 2rem;
+    height: 2rem;
     stroke: currentColor;
-    stroke-width: 5px;
+    stroke-width: 2px;
     stroke-linecap: round;
     margin-top: 0.25rem;
     overflow: visible;
