@@ -1,5 +1,5 @@
 <?php if ($text->isNotEmpty()): ?>
-    <aside class="slider" id="<?= $id ?>" aria-hidden="true">
+    <aside class="slider" id="<?= $id ?>" inert>
         <div class="slider-button">
             <button class="slider-close" type="button" aria-label="Close <?= $label ?>">
                 <svg viewBox="0 0 24 24" aria-hidden="true">

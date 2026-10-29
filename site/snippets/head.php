@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?php $pageTitle = $site->title()->esc() . ' — Arianna Pontil Ceste' ?>
+    <?php $pageTitle = $page->title()->esc() ?>
     <title><?= $pageTitle ?></title>
     <meta name="description" content="<?= $site->description() ?>">
     <link rel="canonical" href="<?= $page->url() ?>">
@@ -39,7 +39,6 @@
         <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
         <?= js([
             'assets/js/script.js',
-            'assets/js/2d.js',
             'assets/js/animation.js',
             '@auto',
         ]) ?>

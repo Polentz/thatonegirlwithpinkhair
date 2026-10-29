@@ -1,6 +1,3 @@
-// Shared by the 2D and 3D pages: page height, side panels and the filters
-// menu. Anything layout-specific lives in 2d.js / 3d.js.
-
 const documentHeight = () => {
     const doc = document.documentElement;
     doc.style.setProperty("--doc-height", `${window.innerHeight}px`);
@@ -19,8 +16,17 @@ const sliders = () => {
     if (!pairs.length) return;
 
     const setOpen = ({ toggles, slider }, open) => {
+        // Closing a panel while its X (or a link in it) has focus: hand focus
+        // back to the panel's toggle, or drop it if the panel has none (the
+        // 3D "Read more" panels), so focus never sits inside a hidden panel.
+        if (!open && slider.contains(document.activeElement)) {
+            if (toggles[0]) toggles[0].focus({ preventScroll: true });
+            else document.activeElement.blur();
+        }
         slider.classList.toggle("is-open", open);
-        slider.setAttribute("aria-hidden", String(!open));
+        // inert hides a closed panel from screen readers and keeps its
+        // buttons and links out of keyboard focus.
+        slider.inert = !open;
         toggles.forEach((toggle) => toggle.setAttribute("aria-expanded", String(open)));
     };
     const closeAll = () => pairs.forEach((pair) => setOpen(pair, false));
