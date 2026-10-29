@@ -552,9 +552,10 @@ const sliders = () => {
 };
 
 // Filters menu in the nav: the label opens the list; choosing a filter keeps
-// only the clusters tagged with it ("All" shows every cluster). Clicking
-// outside or Escape closes the list. The choice is also announced as a
-// "clusterfilter" event, which the 3D page listens to.
+// only the clusters tagged with it, and clicking the active filter again
+// turns it off (every cluster shows). Clicking outside or Escape closes the
+// list. The choice is also announced as a "clusterfilter" event, which the
+// 3D page listens to.
 const filtersMenu = () => {
     const toggle = document.querySelector(".filters-toggle");
     const list = document.getElementById("filters-list");
@@ -581,8 +582,9 @@ const filtersMenu = () => {
     const options = list.querySelectorAll(".filter-option");
     options.forEach((option) => {
         option.addEventListener("click", () => {
-            const filter = option.dataset.filter; // "" for All
-            options.forEach((o) => o.classList.toggle("is-active", o === option));
+            // Clicking the active filter again clears it ("" = show all).
+            const filter = option.classList.contains("is-active") ? "" : option.dataset.filter;
+            options.forEach((o) => o.classList.toggle("is-active", !!filter && o === option));
             // Mark the label with a superscript 1 while a filter is on.
             const count = toggle.querySelector(".filters-count");
             if (count) count.hidden = !filter;

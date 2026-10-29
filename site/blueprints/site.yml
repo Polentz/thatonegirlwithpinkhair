@@ -4,6 +4,12 @@ columns:
   main:
     width: 2/3
     sections:
+      site:
+        type: fields
+        fields:
+          siteHeadline:
+            type: headline
+            label: "Website Pages:"
       pages:
         label: Homepage
         type: pages
@@ -17,9 +23,12 @@ columns:
         max: 1
         templates:
           - home
-      site:
+      content:
         type: fields
         fields:
+          contentHeadline:
+            type: headline
+            label: "Content:"
           infoText:
             label: Info Text
             type: writer
@@ -45,6 +54,21 @@ columns:
             nodes:
               - bulletList
               - orderedList
+          menuHeadline:
+            type: headline
+            label: "Menu:"
+          infoLabel: 
+            label: Info Label
+            type: text
+            width: 1/3
+          contactLabel:
+            label: Contact Label
+            type: text
+            width: 1/3
+          filtersLabel:
+            label: Filters Label
+            type: text
+            width: 1/3
   sidebar:
     width: 1/3
     sections:

@@ -17,20 +17,19 @@ if ($clustersPage) {
 <header class="header">
     <h1><?= $site->title() ?></h1>
     <nav class="nav">
-        <?php if ($site->infoText()->isNotEmpty()): ?>
+        <?php if ($site->infoText()->isNotEmpty() && $site->infoLabel()->isNotEmpty()): ?>
             <a class="nav-label slider-toggle" href="#info-slider" aria-controls="info-slider"
-                aria-expanded="false">Info</a>
+                aria-expanded="false"><?= $site->infoLabel() ?></a>
         <?php endif ?>
-        <?php if ($site->contactText()->isNotEmpty()): ?>
-            <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider"
-                aria-expanded="false">Follow</a>
+        <?php if ($site->contactText()->isNotEmpty() && $site->contactLabel()->isNotEmpty()): ?>
+            <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider" aria-expanded="false">
+                <?= $site->contactLabel() ?></a>
         <?php endif ?>
-        <?php if (!empty($filters)): ?>
+        <?php if (!empty($filters) && $site->filtersLabel()->isNotEmpty()): ?>
             <div class="nav-filters">
                 <a class="nav-label filters-toggle" href="#filters-list" aria-controls="filters-list"
-                    aria-expanded="false">Filters<span class="filters-count" hidden>*</span></a>
+                    aria-expanded="false"><?= $site->filtersLabel() ?><span class="filters-count" hidden>*</span></a>
                 <ul class="filters-list" id="filters-list" hidden>
-                    <li><button class="filter-option is-active" type="button" data-filter="">All</button></li>
                     <?php foreach ($filters as $filter): ?>
                         <li><button class="filter-option" type="button" data-filter="<?= esc($filter, 'attr') ?>">
                                 <?= esc($filter) ?>

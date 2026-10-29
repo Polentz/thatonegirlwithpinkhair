@@ -10,6 +10,18 @@ Contacttext: <p>Instagram<strong>:</strong> <a href="https://www.instagram.com/t
 
 ----
 
+Infolabel: info
+
+----
+
+Contactlabel: follow
+
+----
+
+Filterslabel: filters
+
+----
+
 Description: You’re logged in as that one girl with pink hair è un progetto che traduce la mia esperienza di Internet in un corpo di lavoro visivo. Il fruitore entra in un universo plasmato dalla mia For You Page, ma fatto di riferimenti riconoscibili collettivamente grazie alla dualità della natura dell’algoritmo, al tempo stesso individuale e condivisa.
 
 ----

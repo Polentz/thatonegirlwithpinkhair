@@ -1,12 +1,3 @@
-<?php
-/**
- * Side panel opened by a nav link with aria-controls="<?= $id ?>".
- * @var string $id     element id, e.g. "info-slider"
- * @var string $label  used for the close button's aria-label
- * @var \Kirby\Content\Field $text
- * @var \Kirby\Content\Field|null $title  optional, shown in bold before the text
- */
-?>
 <?php if ($text->isNotEmpty()): ?>
     <aside class="slider" id="<?= $id ?>" aria-hidden="true">
         <div class="slider-button">
@@ -19,7 +10,6 @@
         </div>
         <div class="slider-content">
             <?php if (isset($title) && $title->isNotEmpty()): ?>
-                <?php /* Inline formatting only: the title may be stored as a <p>. */ ?>
                 <p><strong><?= strip_tags($title->value(), '<em><i><b><strong><u><s><a>') ?></strong></p>
             <?php endif ?>
             <?= $text->kt() ?>

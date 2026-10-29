@@ -6,6 +6,11 @@ Howtotext: <p><strong>How to navigate the page</strong><br>Drag to turn the univ
 
 ----
 
+Filterslabel: filters
+
+----
+
+
 Filterlist: Filter 1, Filter 2, Filter 3
 
 ----

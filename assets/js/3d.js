@@ -478,7 +478,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // The nav's Filters menu (script.js): show only the clusters with the chosen
-// filter, or all of them for "All".
+// filter, or all of them when no filter is on.
 // Hidden clusters fade out and shown ones fade in, one after another.
 const FILTER_FADE_MS = 350;
 const FILTER_STAGGER_MS = 50; // between one cluster starting and the next

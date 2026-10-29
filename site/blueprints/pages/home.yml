@@ -64,4 +64,5 @@ columns:
           filterList:
             label: Filters
             type: tags
+            layout: list
             help: The filters visitors can choose from. Assign them in each cluster; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.
