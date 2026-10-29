@@ -1,6 +1,6 @@
 <?php if ($page->howToText()->isNotEmpty()): ?>
     <footer class="footer">
-        <a class="nav-label slider-toggle" href="#how-to-slider" aria-controls="how-to-slider" aria-expanded="false">?</a>
+        <button class="nav-label slider-toggle" type="button" aria-controls="how-to-slider" aria-expanded="false">?</button>
     </footer>
 <?php endif ?>
 

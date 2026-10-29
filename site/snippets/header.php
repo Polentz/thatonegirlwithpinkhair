@@ -19,17 +19,17 @@ if ($clustersPage) {
     <h1><a href="<?= $site->url() ?>"><?= $site->title() ?></a></h1>
     <nav class="nav">
         <?php if ($site->infoText()->isNotEmpty() && $site->infoLabel()->isNotEmpty()): ?>
-            <a class="nav-label slider-toggle" href="#info-slider" aria-controls="info-slider"
-                aria-expanded="false"><?= $site->infoLabel() ?></a>
+            <button class="nav-label slider-toggle" type="button" aria-controls="info-slider"
+                aria-expanded="false"><?= $site->infoLabel() ?></button>
         <?php endif ?>
         <?php if ($site->contactText()->isNotEmpty() && $site->contactLabel()->isNotEmpty()): ?>
-            <a class="nav-label slider-toggle" href="#contact-slider" aria-controls="contact-slider" aria-expanded="false">
-                <?= $site->contactLabel() ?></a>
+            <button class="nav-label slider-toggle" type="button" aria-controls="contact-slider" aria-expanded="false">
+                <?= $site->contactLabel() ?></button>
         <?php endif ?>
         <?php if (!empty($filters) && $site->filtersLabel()->isNotEmpty()): ?>
             <div class="nav-filters">
-                <a class="nav-label filters-toggle" href="#filters-list" aria-controls="filters-list"
-                    aria-expanded="false"><?= $site->filtersLabel() ?><span class="filters-count" hidden>*</span></a>
+                <button class="nav-label filters-toggle" type="button" aria-controls="filters-list"
+                    aria-expanded="false"><?= $site->filtersLabel() ?><span class="filters-count" hidden>*</span></button>
                 <ul class="filters-list" id="filters-list" hidden>
                     <?php foreach ($filters as $key => $name): ?>
                         <li class="filter-option-wrapper">
