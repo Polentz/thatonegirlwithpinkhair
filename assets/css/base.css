@@ -236,11 +236,11 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 *::-moz-selection {
-    color: transparent;
-    background: transparent;
+    color: var(--white-color);
+    background: var(--main-color);
 }
 
 *::selection {
-    color: transparent;
-    background: transparent;
+    color: var(--white-color);
+    background: var(--main-color);
 }
