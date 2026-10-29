@@ -243,6 +243,8 @@ h1 {
 }
 
 .slider-button {
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
     height: fit-content;
     position: absolute;
     top: 0;

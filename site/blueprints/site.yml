@@ -26,6 +26,21 @@ columns:
       content:
         type: fields
         fields:
+          menuHeadline:
+            type: headline
+            label: "Menu:"
+          infoLabel: 
+            label: Info Label
+            type: text
+            width: 1/3
+          contactLabel:
+            label: Contact Label
+            type: text
+            width: 1/3
+          filtersLabel:
+            label: Filters Label
+            type: text
+            width: 1/3
           contentHeadline:
             type: headline
             label: "Content:"
@@ -49,21 +64,6 @@ columns:
             nodes:
               - bulletList
               - orderedList
-          menuHeadline:
-            type: headline
-            label: "Menu:"
-          infoLabel: 
-            label: Info Label
-            type: text
-            width: 1/3
-          contactLabel:
-            label: Contact Label
-            type: text
-            width: 1/3
-          filtersLabel:
-            label: Filters Label
-            type: text
-            width: 1/3
   sidebar:
     width: 1/3
     sections:
