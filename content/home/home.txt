@@ -6,12 +6,21 @@ Howtotext: <p><strong>How to navigate the page</strong><br>Drag to turn the univ
 
 ----
 
-Filterslabel: filters
+Filterlist:
+
+- 
+  name: filter 1
+  key: ethg2e07
+- 
+  name: filter 2
+  key: ulduejvp
+- 
+  name: filter 3
+  key: 3qu2ehnr
 
 ----
 
-
-Filterlist: Filter 1, Filter 2, Filter 3
+Filterslabel: filters
 
 ----
 

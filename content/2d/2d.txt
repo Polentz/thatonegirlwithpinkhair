@@ -6,7 +6,14 @@ Howtotext: <p><strong>How to navigate the page</strong><br>Scroll to zoom, drag 
 
 ----
 
-Filterlist: Ai, New Filter
+Filterlist:
+
+- 
+  name: Ai
+  key: cyblmglb
+- 
+  name: New Filter
+  key: ykahtull
 
 ----
 
@@ -25,7 +32,7 @@ Clusters:
     - file://1xniow7ucwfrvaec
   title: "<p>you're not chic or whimsical, your internet vocabulary is stunted and you're infantilising yourself and buying too many things</p>"
   readmore: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>'
-  filters: Ai
+  filters: cyblmglb
 - 
   images:
     - file://prhkzav4wlxfxl8r
@@ -45,7 +52,7 @@ Clusters:
     - file://iitkgrgy8asspthj
     - file://9hkq156actf6jyqj
     - file://kdkvpyu6uk3j35vi
-  title: I'm just a girl
+  title: "I'm just a girl"
   readmore: ""
   filters: ""
 - 

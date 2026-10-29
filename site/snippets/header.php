@@ -10,7 +10,8 @@ if ($clustersPage) {
     foreach ($shownClusters as $cluster) {
         $used = array_merge($used, $cluster->filters()->split());
     }
-    $filters = array_values(array_intersect($clustersPage->filterList()->split(), $used));
+    // key => name, keeping only filters some shown cluster uses
+    $filters = array_intersect_key($clustersPage->filterOptions(), array_flip($used));
 }
 ?>
 
@@ -30,9 +31,9 @@ if ($clustersPage) {
                 <a class="nav-label filters-toggle" href="#filters-list" aria-controls="filters-list"
                     aria-expanded="false"><?= $site->filtersLabel() ?><span class="filters-count" hidden>*</span></a>
                 <ul class="filters-list" id="filters-list" hidden>
-                    <?php foreach ($filters as $filter): ?>
-                        <li><button class="filter-option" type="button" data-filter="<?= esc($filter, 'attr') ?>">
-                                <?= esc($filter) ?>
+                    <?php foreach ($filters as $key => $name): ?>
+                        <li><button class="filter-option" type="button" data-filter="<?= esc($key, 'attr') ?>">
+                                <?= esc($name) ?>
                             </button></li>
                     <?php endforeach ?>
                 </ul>

@@ -40,7 +40,9 @@ columns:
             type: select
             options:
               type: query
-              query: page.parent.filterList.split
+              query: page.parent.filterList.toStructure
+              value: "{{ item.key }}"
+              text: "{{ item.name }}"
             help: Pick from the filters listed on Home.
           readMore:
             label: Read more

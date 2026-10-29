@@ -38,7 +38,9 @@ columns:
                 type: multiselect
                 options:
                   type: query
-                  query: page.filterList.split
+                  query: page.filterList.toStructure
+                  value: "{{ item.key }}"
+                  text: "{{ item.name }}"
               text:
                 label: Title
                 type: writer
@@ -87,5 +89,14 @@ columns:
             nodes: false
           filterList:
             label: Filters
-            type: tags
-            help: The filters visitors can choose from. Assign them to each cluster below; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.
+            type: structure
+            columns:
+              name: true
+            fields:
+              name:
+                label: Name
+                type: text
+                required: true
+              key:
+                type: hidden
+            help: The filters visitors can choose from, in this order. Assign them to each cluster below; only filters used by at least one cluster appear on the site. Renaming a filter updates it everywhere; deleting it removes it from every cluster. Save after adding a new filter to make it selectable in the clusters.

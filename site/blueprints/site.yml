@@ -91,7 +91,7 @@ columns:
             type: tags
             separator: ','
           ogImage:
-            label: Social Sharing Image
+            label: SEO Social Sharing Image
             type: files
             multiple: false
             query: site.images

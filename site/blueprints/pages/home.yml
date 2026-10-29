@@ -34,6 +34,7 @@ columns:
             width: 1/4
           filters:
             label: Filters
+            value: "{{ page.filterNames }}"
             width: 1/4
           images:
             label: Images
@@ -63,6 +64,14 @@ columns:
               - orderedList
           filterList:
             label: Filters
-            type: tags
-            layout: list
-            help: The filters visitors can choose from. Assign them in each cluster; only filters used by at least one cluster appear on the site. If you rename a filter here, clusters that already use the old name keep it and won't match the new one, so pick the new name again in those clusters.
+            type: structure
+            columns:
+              name: true
+            fields:
+              name:
+                label: Name
+                type: text
+                required: true
+              key:
+                type: hidden
+            help: The filters visitors can choose from, in this order. Assign them in each cluster; only filters used by at least one cluster appear on the site. Renaming a filter updates it everywhere; deleting it removes it from every cluster.
