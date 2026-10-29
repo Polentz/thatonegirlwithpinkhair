@@ -12,7 +12,11 @@
             <?php if (isset($title) && $title->isNotEmpty()): ?>
                 <p><strong><?= strip_tags($title->value(), '<em><i><b><strong><u><s><a>') ?></strong></p>
             <?php endif ?>
-            <?= $text->kt() ?>
+            <?php if (str_starts_with(ltrim($text->value()), '[')): ?>
+                <?= $text->toBlocks() ?>
+            <?php else: ?>
+                <?= $text->kt() ?>
+            <?php endif ?>
         </div>
     </aside>
 <?php endif ?>

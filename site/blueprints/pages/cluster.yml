@@ -46,16 +46,8 @@ columns:
             help: Pick from the filters listed on Home.
           readMore:
             label: Read more
-            type: writer
+            type: blocks
             help: Optional. When filled, a "Read more" button appears among the cluster's images and opens this text in a side panel.
-            marks:
-              - bold
-              - italic
-              - underline
-              - strike
-              - link
-              - email
-              - clear
-            nodes:
-              - bulletList
-              - orderedList
+            fieldsets:
+             - text
+             - image

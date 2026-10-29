@@ -31,15 +31,10 @@ columns:
             label: "Content:"
           infoText:
             label: Info Text
-            type: writer
-            marks:
-              - bold
-              - italic
-              - underline
-              - strike
-              - link
-              - clear
-            nodes: false
+            type: blocks
+            fieldsets:
+             - text
+             - image
           contactText:
             label: Contact Text
             type: writer

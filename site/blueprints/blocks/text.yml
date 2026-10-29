@@ -1,0 +1,19 @@
+name: field.blocks.text.name
+icon: text
+wysiwyg: true
+preview: text
+fields:
+  text:
+    type: writer
+    marks:
+      - bold
+      - italic
+      - underline
+      - strike
+      - link
+      - email
+      - clear
+    nodes:
+      - bulletList
+      - orderedList
+    placeholder: field.blocks.text.placeholder
