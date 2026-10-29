@@ -21,6 +21,14 @@ strong {
     font-weight: bold;
 }
 
+a {
+    transition: text-decoration .3s ease;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
 .header {
     width: 100%;
     position: fixed;
@@ -46,6 +54,10 @@ strong {
 h1 {
     pointer-events: all;
     white-space: nowrap;
+}
+
+h1 a {
+    text-decoration: none;
 }
 
 .nav {

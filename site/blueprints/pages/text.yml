@@ -1,0 +1,19 @@
+title: Text page
+
+options:
+  changeTemplate: false
+  preview: true
+
+columns:
+  main:
+    width: 2/3
+    sections:
+      content:
+        type: fields
+        fields:
+          text:
+            label: Content
+            type: blocks
+            fieldsets:
+             - text
+             - image

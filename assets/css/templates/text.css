@@ -1,0 +1,41 @@
+/* The site's other pages are fullscreen and locked; this one scrolls. */
+body {
+    overflow: auto;
+}
+
+.text-page {
+    max-width: 48rem;
+    padding: 8rem 1rem 4rem;
+}
+
+.text-page-content p,
+.text-page-content ul,
+.text-page-content ol {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.text-page-content ul,
+.text-page-content ol {
+    padding-left: 1.5rem;
+}
+
+.text-page-content ul {
+    list-style: disc;
+}
+
+.text-page-content ol {
+    list-style: decimal;
+}
+
+.text-page-content a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 720px) {
+
+    .text-page {
+        padding: 9rem 0.75rem 3rem;
+    }
+}

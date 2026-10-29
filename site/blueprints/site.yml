@@ -23,6 +23,14 @@ columns:
         max: 1
         templates:
           - home
+      textPages:
+        label: Text pages
+        type: pages
+        status: all
+        image: false
+        templates:
+          - text
+        help: Simple text-only pages, such as the privacy policy.
       content:
         type: fields
         fields:

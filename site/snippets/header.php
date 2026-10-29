@@ -16,7 +16,7 @@ if ($clustersPage) {
 ?>
 
 <header class="header">
-    <h1><?= $site->title() ?></h1>
+    <h1><a href="<?= $site->url() ?>"><?= $site->title() ?></a></h1>
     <nav class="nav">
         <?php if ($site->infoText()->isNotEmpty() && $site->infoLabel()->isNotEmpty()): ?>
             <a class="nav-label slider-toggle" href="#info-slider" aria-controls="info-slider"

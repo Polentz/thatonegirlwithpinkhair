@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?php $pageTitle = $page->title()->esc() ?>
-    <title><?= $pageTitle ?></title>
+    <title><?= $page->title()->esc() ?></title>
     <meta name="description" content="<?= $site->description() ?>">
     <link rel="canonical" href="<?= $page->url() ?>">
     <meta name="keywords" content="<?= $site->keywords() ?>">
     <meta property="og:locale" content="en">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="<?= $pageTitle ?>">
+    <meta property="og:title" content="<?= $page->title()->esc() ?>">
     <meta property="og:description" content="<?= $site->description() ?>">
     <meta property="og:url" content="<?= $page->url() ?>">
     <meta property="og:site_name" content="<?= $site->title() ?>">
@@ -32,17 +31,7 @@
         '@auto',
     ]) ?>
     <noscript>Please turn on JS to navigate this website</noscript>
-    <?php if ($page->intendedTemplate()->name() === 'home'): ?>
-        <?= js('assets/js/script.js') ?>
-    <?php else: ?>
-        <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" defer></script>
-        <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js" defer></script>
-        <?= js([
-            'assets/js/script.js',
-            'assets/js/animation.js',
-            '@auto',
-        ]) ?>
-    <?php endif ?>
+    <?= js('assets/js/script.js') ?>
 </head>
 
 <body>
