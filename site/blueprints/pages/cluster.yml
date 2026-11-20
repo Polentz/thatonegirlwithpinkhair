@@ -41,7 +41,7 @@ columns:
         fields:
           filters:
             label: Filters
-            type: select
+            type: multiselect
             options:
               type: query
               query: page.parent.filterList.toStructure
