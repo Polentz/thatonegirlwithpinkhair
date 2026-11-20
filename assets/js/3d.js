@@ -3,10 +3,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const PINK = 0xd81a7d;
 const CARD_SIZE = 2;          // longest side of an image card, in world units 1.2
-const CARD_SPACING = 10;       // min distance between cards in a cluster 1.4
-const CLUSTER_RADIUS = 5;     // cards stay within this distance of their cluster's centre 2.4
-const CLUSTER_SPACING = 2 * CLUSTER_RADIUS + 2.5; // min distance between cluster centres 
-const UNIVERSE_RADIUS = 16;     // clusters are scattered inside this sphere 16
+const CARD_SPACING = 3.5;     // min distance between card centres in a cluster — raise for more air
+const CLUSTER_RADIUS = 5;     // smallest cluster size; clusters with many images grow beyond it
+const CLUSTER_GAP = 2.5;      // min empty space between the edges of two clusters
+const UNIVERSE_RADIUS = 16;     // clusters are scattered inside this sphere (grows if they don't fit)
+const PACKING = 0.3;          // how densely random points can fill a sphere; lower = roomier
 const TEXT_LINE_HEIGHT = CARD_SIZE * 0.1; // height of one line of cluster text
 const TEXT_MAX_WIDTH = CARD_SIZE * 2;      // cluster text wraps beyond this width
 const CLOSE_UP_DISTANCE = 6;    // how far in front of the camera a clicked card floats
@@ -53,19 +54,53 @@ const randomInSphere = (radius) => {
     return v.multiplyScalar(radius);
 };
 
+// A random point inside a sphere. `room(point)` says how much clearance a
+// candidate has (>= 0 means enough). Stops at the first point with enough
+// room; if none turns up in 300 tries, keeps the roomiest one it saw.
+const roomiestPoint = (radius, room) => {
+    let best = null;
+    let bestRoom = -Infinity;
+    for (let attempt = 0; attempt < 300 && bestRoom < 0; attempt++) {
+        const point = randomInSphere(radius);
+        const r = room(point);
+        if (r > bestRoom) {
+            best = point;
+            bestRoom = r;
+        }
+    }
+    return best;
+};
+
 // `count` random points inside a sphere, trying to keep `minDistance` apart
 // from each other and from any points already `taken`.
 const scatterPoints = (count, radius, minDistance, taken = []) => {
     const points = [];
     for (let i = 0; i < count; i++) {
-        let point;
-        for (let attempt = 0; attempt < 300; attempt++) {
-            point = randomInSphere(radius);
-            if ([...taken, ...points].every((other) => other.distanceTo(point) >= minDistance)) break;
-        }
-        points.push(point);
+        const others = [...taken, ...points];
+        points.push(roomiestPoint(radius, (p) =>
+            Math.min(Infinity, ...others.map((other) => other.distanceTo(p) - minDistance))));
     }
     return points;
+};
+
+// How far a cluster's cards may spread from its centre: big enough for
+// `count` cards (plus the text in the middle) to keep CARD_SPACING apart.
+const clusterRadius = (count) => {
+    const centres = (CARD_SPACING / 2) * (Math.cbrt((count + 1) / PACKING) - 1);
+    return Math.max(CLUSTER_RADIUS, centres + CARD_SIZE / 2);
+};
+
+// Cluster centres, kept far enough apart that clusters of different sizes
+// don't overlap. The universe grows if the clusters wouldn't fit in it.
+const placeClusters = (radii) => {
+    const room = radii.reduce((sum, r) => sum + (r + CLUSTER_GAP / 2) ** 3, 0);
+    const universeRadius = Math.max(UNIVERSE_RADIUS, Math.cbrt(room / PACKING) - Math.max(0, ...radii));
+    const centres = [];
+    radii.forEach((r) => {
+        centres.push(roomiestPoint(universeRadius, (p) =>
+            Math.min(Infinity, ...centres.map((c, j) => c.distanceTo(p) - r - radii[j] - CLUSTER_GAP))));
+    });
+    return centres;
 };
 
 // --- Cards --------------------------------------------------------------------
@@ -261,7 +296,8 @@ const clickables = []; // cards and "Read more" hit areas
 const readMoreButtons = []; // { button, cluster }
 const holders = []; // card + glow pairs and text labels, turned to face the camera every frame
 
-const clusterCentres = scatterPoints(data.length, UNIVERSE_RADIUS, CLUSTER_SPACING);
+const clusterRadii = data.map((clusterData) => clusterRadius(clusterData.images.length));
+const clusterCentres = placeClusters(clusterRadii);
 
 data.forEach((clusterData, i) => {
     const group = new THREE.Group();
@@ -292,7 +328,7 @@ data.forEach((clusterData, i) => {
         taken.push(new THREE.Vector3());
     }
     if (!label && clusterData.readMore) taken.push(new THREE.Vector3()); // keep the centre for the button
-    const offsets = scatterPoints(clusterData.images.length, CLUSTER_RADIUS - CARD_SIZE / 2, CARD_SPACING, taken);
+    const offsets = scatterPoints(clusterData.images.length, clusterRadii[i] - CARD_SIZE / 2, CARD_SPACING, taken);
 
     // "Read more" sits right under the text. As a child of the text label it
     // turns with it, so it stays under the text on screen from any angle.
